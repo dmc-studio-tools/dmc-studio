@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMCStudio - Editor de Fotos Sencillo</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom scrollbar for sidebar panels */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        /* Canvas workspace checkerboard background */
+        .checkerboard {
+            background-color: #0b0f19;
+            background-image: 
+                linear-gradient(45deg, #111827 25%, transparent 25%), 
+                linear-gradient(-45deg, #111827 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #111827 75%), 
+                linear-gradient(-45deg, transparent 75%, #111827 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden font-sans antialiased">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between z-10 shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 p-2 rounded-lg text-white">
+                <i data-lucide="aperture" class="w-6 h-6 animate-spin-slow"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">DMCStudio</h1>
+                <p class="text-xs text-slate-400">Editor de fotos rápido y sencillo</p>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-2">
+            <button id="btnReset" class="hidden px-4 py-2 text-sm font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition flex items-center space-x-1.5">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Restablecer</span>
+            </button>
+            <button id="btnDownload" class="hidden px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 rounded-lg shadow-lg shadow-indigo-500/20 transition flex items-center space-x-1.5">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>Descargar</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+        
+        <!-- Left Panel: Sidebar controls -->
+        <aside id="sidebar" class="w-full md:w-80 bg-slate-900 border-t md:border-t-0 md:border-r border-slate-800 flex flex-col z-10 shrink-0 order-2 md:order-1 h-2/5 md:h-full">
+            <!-- Tool Tabs -->
+            <div class="flex border-b border-slate-800 bg-slate-950/50 text-xs font-semibold overflow-x-auto shrink-0">
+                <button onclick="switchTab('adjust')" id="tab-adjust" class="flex-1 py-3 px-2 text-center border-b-2 border-indigo-500 text-indigo-400 flex flex-col items-center gap-1 min-w-[70px]">
+                    <i data-lucide="sliders" class="w-4 h-4"></i>
+                    <span>Ajustes</span>
+                </button>
+                <button onclick="switchTab('filters')" id="tab-filters" class="flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex flex-col items-center gap-1 min-w-[70px]">
+                    <i data-lucide="palette" class="w-4 h-4"></i>
+                    <span>Filtros</span>
+                </button>
+                <button onclick="switchTab('draw')" id="tab-draw" class="flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex flex-col items-center gap-1 min-w-[70px]">
+                    <i data-lucide="brush" class="w-4 h-4"></i>
+                    <span>Dibujar</span>
+                </button>
+                <button onclick="switchTab('text')" id="tab-text" class="flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex flex-col items-center gap-1 min-w-[70px]">
+                    <i data-lucide="type" class="w-4 h-4"></i>
+                    <span>Texto</span>
+                </button>
+            </div>
+
+            <!-- Tab Contents (Scrollable Container) -->
+            <div class="flex-1 overflow-y-auto p-5 space-y-6">
+                
+                <!-- Panel: ADJUST -->
+                <div id="panel-adjust" class="space-y-5">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-semibold text-slate-300">Ajustes Básicos</h3>
+                        <button onclick="resetSliders()" class="text-xs text-indigo-400 hover:text-indigo-300">Reiniciar</button>
+                    </div>
+                    
+                    <!-- Brillo -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span class="flex items-center gap-1"><i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i> Brillo</span>
+                            <span id="val-brightness">100%</span>
+                        </div>
+                        <input type="range" id="slider-brightness" min="0" max="200" value="100" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+
+                    <!-- Contraste -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span class="flex items-center gap-1"><i data-lucide="contrast" class="w-3.5 h-3.5 text-blue-400"></i> Contraste</span>
+                            <span id="val-contrast">100%</span>
+                        </div>
+                        <input type="range" id="slider-contrast" min="0" max="200" value="100" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+
+                    <!-- Saturación -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span class="flex items-center gap-1"><i data-lucide="droplet" class="w-3.5 h-3.5 text-pink-400"></i> Saturación</span>
+                            <span id="val-saturation">100%</span>
+                        </div>
+                        <input type="range" id="slider-saturation" min="0" max="200" value="100" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+
+                    <!-- Desenfoque -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span class="flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i> Desenfoque (Blur)</span>
+                            <span id="val-blur">0px</span>
+                        </div>
+                        <input type="range" id="slider-blur" min="0" max="20" value="0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+
+                    <!-- Sepia -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span class="flex items-center gap-1"><i data-lucide="sunset" class="w-3.5 h-3.5 text-orange-400"></i> Sepia</span>
+                            <span id="val-sepia">0%</span>
+                        </div>
+                        <input type="range" id="slider-sepia" min="0" max="100" value="0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+
+                    <!-- Escala de Grises -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span class="flex items-center gap-1"><i data-lucide="eye-off" class="w-3.5 h-3.5 text-slate-400"></i> Escala de grises</span>
+                            <span id="val-grayscale">0%</span>
+                        </div>
+                        <input type="range" id="slider-grayscale" min="0" max="100" value="0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+
+                    <!-- Tono (Hue) -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span class="flex items-center gap-1"><i data-lucide="palette" class="w-3.5 h-3.5 text-purple-400"></i> Rotación de tono</span>
+                            <span id="val-hue">0°</span>
+                        </div>
+                        <input type="range" id="slider-hue" min="0" max="360" value="0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+
+                    <!-- Transformaciones rápidas -->
+                    <div class="pt-2 border-t border-slate-800 space-y-3">
+                        <h4 class="text-xs font-semibold text-slate-400">Transformación rápida</h4>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="rotateImage(-90)" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 hover:text-white transition flex flex-col items-center gap-1" title="Rotar izquierda">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                                <span class="text-[9px]">-90°</span>
+                            </button>
+                            <button onclick="rotateImage(90)" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 hover:text-white transition flex flex-col items-center gap-1" title="Rotar derecha">
+                                <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                                <span class="text-[9px]">+90°</span>
+                            </button>
+                            <button onclick="flipImage('h')" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 hover:text-white transition flex flex-col items-center gap-1" title="Voltear Horizontal">
+                                <i data-lucide="flip-horizontal" class="w-4 h-4"></i>
+                                <span class="text-[9px]">Horizontal</span>
+                            </button>
+                            <button onclick="flipImage('v')" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 hover:text-white transition flex flex-col items-center gap-1" title="Voltear Vertical">
+                                <i data-lucide="flip-vertical" class="w-4 h-4"></i>
+                                <span class="text-[9px]">Vertical</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel: FILTERS -->
+                <div id="panel-filters" class="hidden space-y-4">
+                    <h3 class="text-sm font-semibold text-slate-300">Filtros Preestablecidos</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Normal -->
+                        <button onclick="applyPresetFilter('normal')" class="preset-card group relative overflow-hidden rounded-lg border-2 border-indigo-500 bg-slate-800 text-left p-3 transition hover:bg-slate-750">
+                            <div class="text-xs font-bold text-slate-200">Original</div>
+                            <div class="text-[10px] text-slate-400 mt-1">Sin filtros aplicados</div>
+                        </button>
+                        <!-- Vintage -->
+                        <button onclick="applyPresetFilter('vintage')" class="preset-card group relative overflow-hidden rounded-lg border border-slate-800 bg-slate-800 text-left p-3 transition hover:bg-slate-750 hover:border-slate-700">
+                            <div class="text-xs font-bold text-amber-500">Retro Vintage</div>
+                            <div class="text-[10px] text-slate-400 mt-1">Tono cálido clásico</div>
+                        </button>
+                        <!-- Noir (Mono/Dark) -->
+                        <button onclick="applyPresetFilter('noir')" class="preset-card group relative overflow-hidden rounded-lg border border-slate-800 bg-slate-800 text-left p-3 transition hover:bg-slate-750 hover:border-slate-700">
+                            <div class="text-xs font-bold text-slate-300">Cine Noir</div>
+                            <div class="text-[10px] text-slate-400 mt-1">Alto contraste en B/N</div>
+                        </button>
+                        <!-- Warm / Sunset -->
+                        <button onclick="applyPresetFilter('warm')" class="preset-card group relative overflow-hidden rounded-lg border border-slate-800 bg-slate-800 text-left p-3 transition hover:bg-slate-750 hover:border-slate-700">
+                            <div class="text-xs font-bold text-orange-400">Atardecer</div>
+                            <div class="text-[10px] text-slate-400 mt-1">Colores ardientes</div>
+                        </button>
+                        <!-- Cool / Nordic -->
+                        <button onclick="applyPresetFilter('cool')" class="preset-card group relative overflow-hidden rounded-lg border border-slate-800 bg-slate-800 text-left p-3 transition hover:bg-slate-750 hover:border-slate-700">
+                            <div class="text-xs font-bold text-sky-400">Nórdico</div>
+                            <div class="text-[10px] text-slate-400 mt-1">Frío y minimalista</div>
+                        </button>
+                        <!-- Dramatic / Cyberpunk -->
+                        <button onclick="applyPresetFilter('dramatic')" class="preset-card group relative overflow-hidden rounded-lg border border-slate-800 bg-slate-800 text-left p-3 transition hover:bg-slate-750 hover:border-slate-700">
+                            <div class="text-xs font-bold text-purple-400">Cyberpunk</div>
+                            <div class="text-[10px] text-slate-400 mt-1">Tonalidades neón</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel: DRAW -->
+                <div id="panel-draw" class="hidden space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-semibold text-slate-300">Herramienta de Dibujo</h3>
+                        <!-- Toggle activation -->
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="chk-draw-active" class="sr-only peer" onchange="toggleDrawingMode()">
+                            <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white"></div>
+                            <span class="ml-2 text-xs text-slate-400 font-medium">Activar</span>
+                        </label>
+                    </div>
+
+                    <div class="space-y-4 pt-2">
+                        <!-- Brush Color -->
+                        <div class="space-y-2">
+                            <label class="text-xs text-slate-400">Color del pincel</label>
+                            <div class="flex items-center space-x-3">
+                                <input type="color" id="draw-color" value="#4f46e5" class="w-10 h-10 border-0 bg-transparent cursor-pointer rounded-lg p-0">
+                                <div class="flex gap-1.5 flex-1 overflow-x-auto py-1">
+                                    <button onclick="setBrushColor('#ef4444')" class="w-6 h-6 rounded-full bg-red-500 border border-slate-700 flex-shrink-0 hover:scale-110 transition"></button>
+                                    <button onclick="setBrushColor('#22c55e')" class="w-6 h-6 rounded-full bg-green-500 border border-slate-700 flex-shrink-0 hover:scale-110 transition"></button>
+                                    <button onclick="setBrushColor('#3b82f6')" class="w-6 h-6 rounded-full bg-blue-500 border border-slate-700 flex-shrink-0 hover:scale-110 transition"></button>
+                                    <button onclick="setBrushColor('#eab308')" class="w-6 h-6 rounded-full bg-yellow-500 border border-slate-700 flex-shrink-0 hover:scale-110 transition"></button>
+                                    <button onclick="setBrushColor('#ffffff')" class="w-6 h-6 rounded-full bg-white border border-slate-700 flex-shrink-0 hover:scale-110 transition"></button>
+                                    <button onclick="setBrushColor('#000000')" class="w-6 h-6 rounded-full bg-black border border-slate-700 flex-shrink-0 hover:scale-110 transition"></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Brush Size -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs text-slate-400">
+                                <span>Tamaño del trazo</span>
+                                <span id="val-brush-size">8px</span>
+                            </div>
+                            <input type="range" id="slider-brush-size" min="1" max="50" value="8" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" oninput="updateBrushSize(this.value)">
+                        </div>
+
+                        <div class="pt-2">
+                            <button onclick="clearDrawings()" class="w-full py-2 bg-rose-950 hover:bg-rose-900 border border-rose-800/60 text-rose-300 rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1.5">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                <span>Borrar todos los trazos</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel: TEXT -->
+                <div id="panel-text" class="hidden space-y-4">
+                    <h3 class="text-sm font-semibold text-slate-300">Añadir Texto</h3>
+                    
+                    <div class="space-y-3">
+                        <input type="text" id="text-input" placeholder="Escribe tu texto aquí..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <!-- Text Color -->
+                            <div class="space-y-1">
+                                <label class="text-[11px] text-slate-500">Color de texto</label>
+                                <input type="color" id="text-color" value="#ffffff" class="w-full h-8 bg-transparent border-0 cursor-pointer p-0">
+                            </div>
+                            <!-- Font Size -->
+                            <div class="space-y-1">
+                                <label class="text-[11px] text-slate-500">Tamaño de letra</label>
+                                <input type="number" id="text-size" value="40" min="10" max="200" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-sm text-slate-100 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <button id="btn-add-text" onclick="addTextOverlay()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1.5">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                <span>Insertar texto</span>
+                            </button>
+                        </div>
+
+                        <!-- Hint -->
+                        <div class="p-3 bg-indigo-950/30 border border-indigo-900/40 rounded-lg">
+                            <p class="text-[10px] text-indigo-300 leading-relaxed">
+                                <i data-lucide="info" class="w-3 h-3 inline mr-1 mb-0.5"></i>
+                                Una vez añadido el texto, puedes arrastrarlo directamente con el ratón o el dedo sobre la foto para cambiar su posición.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- Right Panel: Canvas workspace -->
+        <section class="flex-1 flex flex-col justify-between p-4 md:p-8 checkerboard overflow-hidden order-1 md:order-2 h-3/5 md:h-full relative">
+            
+            <!-- Upload Area (overlay when no image uploaded) -->
+            <div id="upload-container" class="absolute inset-0 flex flex-col items-center justify-center p-6 bg-slate-950/80 backdrop-blur-sm z-20 transition-all duration-300">
+                <div class="max-w-md w-full bg-slate-900/90 border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-8 text-center cursor-pointer transition-all shadow-2xl group" id="drop-zone">
+                    <input type="file" id="file-input" accept="image/*" class="hidden">
+                    <div class="w-16 h-16 bg-slate-800 group-hover:bg-indigo-600/10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all">
+                        <i data-lucide="image" class="w-8 h-8 text-slate-400 group-hover:text-indigo-400 transition-all"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-200">Sube tu fotografía</h3>
+                    <p class="text-xs text-slate-400 mt-2 mb-6">Arrastra y suelta tu archivo de imagen aquí, o haz clic para explorar tu equipo.</p>
+                    <button class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/25 transition">
+                        Seleccionar Archivo
+                    </button>
+                    <div class="mt-4 text-[10px] text-slate-500">Soporta PNG, JPEG, WEBP y más formatos. Todo el procesado ocurre en tu navegador para proteger tu privacidad.</div>
+                </div>
+            </div>
+
+            <!-- Canvas Container (Active workspace) -->
+            <div class="flex-1 flex items-center justify-center w-full h-full relative overflow-hidden" id="canvas-wrapper">
+                <!-- Our dynamic Canvas representing the image and operations -->
+                <canvas id="photo-canvas" class="max-w-full max-h-full object-contain shadow-2xl transition-all duration-100 hidden cursor-default"></canvas>
+            </div>
+
+            <!-- Toolbar below canvas (only visible when image is loaded) -->
+            <div id="image-status-bar" class="hidden mt-4 shrink-0 bg-slate-900/90 border border-slate-800/80 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs text-slate-400 max-w-lg mx-auto w-full">
+                <span id="img-resolution" class="flex items-center gap-1"><i data-lucide="maximize-2" class="w-3.5 h-3.5 text-slate-500"></i> --x-- px</span>
+                <span id="img-name" class="truncate max-w-[150px] font-medium text-slate-300">imagen.jpg</span>
+                <button onclick="triggerNewUpload()" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Cambiar imagen
+                </button>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Custom Notification Toast -->
+    <div id="toast-notification" class="fixed bottom-6 right-6 bg-slate-900 border border-slate-800 text-slate-200 px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-2 translate-y-24 opacity-0 transition-all duration-300 z-50">
+        <div class="p-1 rounded-full bg-emerald-500/10 text-emerald-500">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+        </div>
+        <span class="text-sm" id="toast-message">Mensaje del sistema</span>
+    </div>
+
+    <!-- Core Editor JS Script -->
+    <script>
+        // Init Lucide Icons
+        lucide.createIcons();
+
+        // Canvas & Context Setup
+        const canvas = document.getElementById('photo-canvas');
+        const ctx = canvas.getContext('2d');
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const uploadContainer = document.getElementById('upload-container');
+        const canvasWrapper = document.getElementById('canvas-wrapper');
+        const imgResolution = document.getElementById('img-resolution');
+        const imgName = document.getElementById('img-name');
+        const imageStatusBar = document.getElementById('image-status-bar');
+        const btnReset = document.getElementById('btnReset');
+        const btnDownload = document.getElementById('btnDownload');
+
+        // Application State
+        let originalImage = null; // Storing original image instance
+        let currentImageName = "imagen.jpg";
+        let activeTab = 'adjust';
+        
+        // Active sliders state
+        const adjustments = {
+            brightness: 100,
+            contrast: 100,
+            saturation: 100,
+            blur: 0,
+            sepia: 0,
+            grayscale: 0,
+            hue: 0
+        };
+
+        // Rotation & Flip state
+        let rotationAngle = 0; // 0, 90, 180, 270 degrees
+        let flipH = false;
+        let flipV = false;
+
+        // Interactive drawing tool state
+        let isDrawingMode = false;
+        let isDrawing = false;
+        let brushColor = '#4f46e5';
+        let brushSize = 8;
+        let drawings = []; // Stores strokes: { points: [{x, y}], color, size }
+        let currentStroke = null;
+
+        // Interactive text tool state
+        let texts = []; // Stores texts: { text, x, y, size, color, isDragging }
+        let selectedTextIndex = -1;
+        let isDraggingText = false;
+        let textDragStartX = 0;
+        let textDragStartY = 0;
+
+        // Initialize drag & drop listeners
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-indigo-500', 'bg-indigo-600/5');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-indigo-500', 'bg-indigo-600/5');
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Load & Initialize image
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showToast("Por favor, selecciona un archivo de tipo imagen válido.");
+                return;
+            }
+
+            currentImageName = file.name;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    originalImage = img;
+                    resetEditorState();
+                    
+                    // Setup UI elements
+                    uploadContainer.classList.add('opacity-0', 'pointer-events-none');
+                    canvas.classList.remove('hidden');
+                    imageStatusBar.classList.remove('hidden');
+                    btnReset.classList.remove('hidden');
+                    btnDownload.classList.remove('hidden');
+                    
+                    renderCanvas();
+                    showToast("¡Imagen cargada correctamente!");
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Reset overall editor state to default values
+        function resetEditorState() {
+            adjustments.brightness = 100;
+            adjustments.contrast = 100;
+            adjustments.saturation = 100;
+            adjustments.blur = 0;
+            adjustments.sepia = 0;
+            adjustments.grayscale = 0;
+            adjustments.hue = 0;
+
+            rotationAngle = 0;
+            flipH = false;
+            flipV = false;
+
+            drawings = [];
+            texts = [];
+            isDrawingMode = false;
+            document.getElementById('chk-draw-active').checked = false;
+            canvas.style.cursor = 'default';
+
+            resetSliderElements();
+            applyPresetUIHighlight('normal');
+        }
+
+        function resetSliderElements() {
+            document.getElementById('slider-brightness').value = 100;
+            document.getElementById('slider-contrast').value = 100;
+            document.getElementById('slider-saturation').value = 100;
+            document.getElementById('slider-blur').value = 0;
+            document.getElementById('slider-sepia').value = 0;
+            document.getElementById('slider-grayscale').value = 0;
+            document.getElementById('slider-hue').value = 0;
+
+            updateSliderLabel('brightness', '100%');
+            updateSliderLabel('contrast', '100%');
+            updateSliderLabel('saturation', '100%');
+            updateSliderLabel('blur', '0px');
+            updateSliderLabel('sepia', '0%');
+            updateSliderLabel('grayscale', '0%');
+            updateSliderLabel('hue', '0°');
+        }
+
+        function triggerNewUpload() {
+            fileInput.value = '';
+            uploadContainer.classList.remove('opacity-0', 'pointer-events-none');
+            canvas.classList.add('hidden');
+            imageStatusBar.classList.add('hidden');
+            btnReset.classList.add('hidden');
+            btnDownload.classList.add('hidden');
+            originalImage = null;
+        }
+
+        // Handle tabs switcher
+        function switchTab(tabName) {
+            activeTab = tabName;
+            
+            // Hide all panels
+            ['adjust', 'filters', 'draw', 'text'].forEach(t => {
+                document.getElementById(`panel-${t}`).classList.add('hidden');
+                
+                // Reset active tab button styles
+                const btn = document.getElementById(`tab-${t}`);
+                btn.className = "flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex flex-col items-center gap-1 min-w-[70px]";
+            });
+
+            // Show active panel
+            document.getElementById(`panel-${tabName}`).classList.remove('hidden');
+            
+            // Set active styles for clicked tab button
+            const activeBtn = document.getElementById(`tab-${tabName}`);
+            activeBtn.className = "flex-1 py-3 px-2 text-center border-b-2 border-indigo-500 text-indigo-400 flex flex-col items-center gap-1 min-w-[70px]";
+
+            // Handle special tab cursors
+            updateWorkspaceCursor();
+        }
+
+        function updateWorkspaceCursor() {
+            if (!originalImage) return;
+            if (activeTab === 'draw' && isDrawingMode) {
+                canvas.style.cursor = 'crosshair';
+            } else if (activeTab === 'text') {
+                canvas.style.cursor = 'text';
+            } else {
+                canvas.style.cursor = 'default';
+            }
+        }
+
+        // Real-time Slider listeners
+        const sliders = ['brightness', 'contrast', 'saturation', 'blur', 'sepia', 'grayscale', 'hue'];
+        sliders.forEach(sliderName => {
+            const slider = document.getElementById(`slider-${sliderName}`);
+            slider.addEventListener('input', (e) => {
+                let val = e.target.value;
+                adjustments[sliderName] = parseInt(val);
+                
+                let unit = '%';
+                if (sliderName === 'blur') unit = 'px';
+                if (sliderName === 'hue') unit = '°';
+                
+                updateSliderLabel(sliderName, `${val}${unit}`);
+                renderCanvas();
+            });
+        });
+
+        function updateSliderLabel(name, value) {
+            document.getElementById(`val-${name}`).textContent = value;
+        }
+
+        function resetSliders() {
+            resetSliderElements();
+            sliders.forEach(sliderName => {
+                adjustments[sliderName] = sliderName === 'brightness' || sliderName === 'contrast' || sliderName === 'saturation' ? 100 : 0;
+            });
+            renderCanvas();
+        }
+
+        // Predefined filter application
+        function applyPresetFilter(filterType) {
+            resetSliders();
+            applyPresetUIHighlight(filterType);
+
+            switch(filterType) {
+                case 'vintage':
+                    adjustments.sepia = 40;
+                    adjustments.contrast = 95;
+                    adjustments.saturation = 80;
+                    document.getElementById('slider-sepia').value = 40;
+                    document.getElementById('slider-contrast').value = 95;
+                    document.getElementById('slider-saturation').value = 80;
+                    updateSliderLabel('sepia', '40%');
+                    updateSliderLabel('contrast', '95%');
+                    updateSliderLabel('saturation', '80%');
+                    break;
+                case 'noir':
+                    adjustments.grayscale = 100;
+                    adjustments.contrast = 140;
+                    adjustments.brightness = 90;
+                    document.getElementById('slider-grayscale').value = 100;
+                    document.getElementById('slider-contrast').value = 140;
+                    document.getElementById('slider-brightness').value = 90;
+                    updateSliderLabel('grayscale', '100%');
+                    updateSliderLabel('contrast', '140%');
+                    updateSliderLabel('brightness', '90%');
+                    break;
+                case 'warm':
+                    adjustments.hue = 15;
+                    adjustments.saturation = 130;
+                    adjustments.brightness = 105;
+                    document.getElementById('slider-hue').value = 15;
+                    document.getElementById('slider-saturation').value = 130;
+                    document.getElementById('slider-brightness').value = 105;
+                    updateSliderLabel('hue', '15°');
+                    updateSliderLabel('saturation', '130%');
+                    updateSliderLabel('brightness', '105%');
+                    break;
+                case 'cool':
+                    adjustments.hue = 190;
+                    adjustments.saturation = 85;
+                    adjustments.contrast = 110;
+                    document.getElementById('slider-hue').value = 190;
+                    document.getElementById('slider-saturation').value = 85;
+                    document.getElementById('slider-contrast').value = 110;
+                    updateSliderLabel('hue', '190°');
+                    updateSliderLabel('saturation', '85%');
+                    updateSliderLabel('contrast', '110%');
+                    break;
+                case 'dramatic':
+                    adjustments.hue = 300;
+                    adjustments.saturation = 150;
+                    adjustments.contrast = 130;
+                    document.getElementById('slider-hue').value = 300;
+                    document.getElementById('slider-saturation').value = 150;
+                    document.getElementById('slider-contrast').value = 130;
+                    updateSliderLabel('hue', '300°');
+                    updateSliderLabel('saturation', '150%');
+                    updateSliderLabel('contrast', '130%');
+                    break;
+                case 'normal':
+                default:
+                    // Already resetted to base 0/100 state
+                    break;
+            }
+            renderCanvas();
+            showToast(`Filtro "${filterType.toUpperCase()}" aplicado`);
+        }
+
+        // Predefined selection highlighter
+        function applyPresetUIHighlight(filterType) {
+            const cards = document.querySelectorAll('.preset-card');
+            cards.forEach(card => {
+                card.classList.remove('border-indigo-500');
+                card.classList.add('border-slate-800');
+            });
+            const presets = ['normal', 'vintage', 'noir', 'warm', 'cool', 'dramatic'];
+            const index = presets.indexOf(filterType);
+            if (index !== -1 && cards[index]) {
+                cards[index].classList.remove('border-slate-800');
+                cards[index].classList.add('border-indigo-500');
+            }
+        }
+
+        // Rotate Image
+        function rotateImage(angle) {
+            rotationAngle = (rotationAngle + angle + 360) % 360;
+            renderCanvas();
+        }
+
+        // Flip Image
+        function flipImage(dir) {
+            if (dir === 'h') flipH = !flipH;
+            if (dir === 'v') flipV = !flipV;
+            renderCanvas();
+        }
+
+        // Drawing Controls
+        function toggleDrawingMode() {
+            isDrawingMode = document.getElementById('chk-draw-active').checked;
+            updateWorkspaceCursor();
+            if (isDrawingMode) {
+                showToast("Modo dibujo activado. Pinta sobre la foto.");
+            }
+        }
+
+        function setBrushColor(color) {
+            brushColor = color;
+            document.getElementById('draw-color').value = color;
+        }
+
+        function updateBrushSize(val) {
+            brushSize = parseInt(val);
+            document.getElementById('val-brush-size').textContent = `${val}px`;
+        }
+
+        document.getElementById('draw-color').addEventListener('input', (e) => {
+            brushColor = e.target.value;
+        });
+
+        function clearDrawings() {
+            if (drawings.length === 0) return;
+            drawings = [];
+            renderCanvas();
+            showToast("Dibujos eliminados.");
+        }
+
+        // Text Controls
+        function addTextOverlay() {
+            const txtInput = document.getElementById('text-input');
+            const textValue = txtInput.value.trim();
+            if (!textValue) {
+                showToast("Por favor, introduce un texto antes de insertar.");
+                return;
+            }
+
+            const size = parseInt(document.getElementById('text-size').value) || 30;
+            const color = document.getElementById('text-color').value;
+
+            // Compute center of original image coordinates to put text nicely
+            let targetX = canvas.width / 2;
+            let targetY = canvas.height / 2;
+
+            texts.push({
+                text: textValue,
+                x: targetX,
+                y: targetY,
+                size: size,
+                color: color,
+                isDragging: false
+            });
+
+            txtInput.value = ''; // clear input
+            renderCanvas();
+            showToast("Texto insertado. Arrástralo a la posición idónea.");
+        }
+
+        // Coordinate calculations for canvas scaling
+        function getCanvasMouseCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            
+            // Calculate scale factors
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            // Touch support fallback
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        // Core Image Processing and Rendering Logic
+        function renderCanvas() {
+            if (!originalImage) return;
+
+            // Set natural dimension base (accounting for rotations that swaps height/width)
+            const is90or270 = (rotationAngle === 90 || rotationAngle === 270);
+            const sourceWidth = originalImage.naturalWidth;
+            const sourceHeight = originalImage.naturalHeight;
+
+            canvas.width = is90or270 ? sourceHeight : sourceWidth;
+            canvas.height = is90or270 ? sourceWidth : sourceHeight;
+
+            // Update status bar details
+            imgName.textContent = currentImageName;
+            imgResolution.innerHTML = `<i data-lucide="maximize-2" class="w-3.5 h-3.5 text-slate-500"></i> ${sourceWidth} × ${sourceHeight} px`;
+            lucide.createIcons();
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+
+            // Set up transformation matrix
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+
+            // Flip
+            const flipScaleH = flipH ? -1 : 1;
+            const flipScaleV = flipV ? -1 : 1;
+            ctx.scale(flipScaleH, flipScaleV);
+
+            // Rotation
+            ctx.rotate((rotationAngle * Math.PI) / 180);
+
+            // Apply filters using CSS-like context logic
+            ctx.filter = `
+                brightness(${adjustments.brightness}%)
+                contrast(${adjustments.contrast}%)
+                saturate(${adjustments.saturation}%)
+                blur(${adjustments.blur}px)
+                sepia(${adjustments.sepia}%)
+                grayscale(${adjustments.grayscale}%)
+                hue-rotate(${adjustments.hue}deg)
+            `;
+
+            // Draw image centered inside transformed context
+            ctx.drawImage(originalImage, -sourceWidth / 2, -sourceHeight / 2, sourceWidth, sourceHeight);
+            
+            // Clean transformations & filters to draw annotations (draw & text) in standard orientation
+            ctx.restore();
+            ctx.filter = 'none';
+
+            // Draw interactive drawings
+            drawings.forEach(stroke => {
+                if (stroke.points.length < 1) return;
+                ctx.beginPath();
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = stroke.color;
+                ctx.lineWidth = stroke.size;
+
+                ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+                for (let i = 1; i < stroke.points.length; i++) {
+                    ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+                }
+                ctx.stroke();
+            });
+
+            // Draw texts overlays
+            texts.forEach((txt, idx) => {
+                ctx.font = `bold ${txt.size}px Arial, sans-serif`;
+                ctx.fillStyle = txt.color;
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'center';
+                
+                // Add soft drop-shadow to text to ensure readability on any background
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                ctx.shadowBlur = 8;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+
+                ctx.fillText(txt.text, txt.x, txt.y);
+
+                // Add visual indicator if selected/hovered in Text tab
+                if (activeTab === 'text' && selectedTextIndex === idx) {
+                    ctx.shadowColor = 'transparent'; // turn off shadow for bounds box
+                    ctx.strokeStyle = '#6366f1';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([6, 4]);
+                    
+                    const textWidth = ctx.measureText(txt.text).width;
+                    const padding = 12;
+                    ctx.strokeRect(
+                        txt.x - textWidth/2 - padding, 
+                        txt.y - txt.size/2 - padding, 
+                        textWidth + padding * 2, 
+                        txt.size + padding * 2
+                    );
+                    ctx.setLineDash([]); // Reset
+                }
+            });
+        }
+
+        // EVENT LISTENERS FOR INTERACTIONS (Mouse / Touch)
+
+        // Mouse Down
+        function handleStart(e) {
+            if (!originalImage) return;
+            const coords = getCanvasMouseCoords(e);
+
+            if (activeTab === 'draw' && isDrawingMode) {
+                isDrawing = true;
+                currentStroke = {
+                    points: [coords],
+                    color: brushColor,
+                    size: brushSize
+                };
+                drawings.push(currentStroke);
+            } 
+            else if (activeTab === 'text') {
+                selectedTextIndex = -1;
+                for (let i = texts.length - 1; i >= 0; i--) {
+                    const txt = texts[i];
+                    ctx.font = `bold ${txt.size}px Arial, sans-serif`;
+                    const textWidth = ctx.measureText(txt.text).width;
+                    const halfH = txt.size / 2;
+                    const halfW = textWidth / 2;
+
+                    // AABB Check
+                    if (coords.x >= txt.x - halfW - 10 && coords.x <= txt.x + halfW + 10 &&
+                        coords.y >= txt.y - halfH - 10 && coords.y <= txt.y + halfH + 10) {
+                        selectedTextIndex = i;
+                        isDraggingText = true;
+                        textDragStartX = coords.x - txt.x;
+                        textDragStartY = coords.y - txt.y;
+                        break;
+                    }
+                }
+                renderCanvas();
+            }
+        }
+
+        // Mouse Move
+        function handleMove(e) {
+            if (!originalImage) return;
+            const coords = getCanvasMouseCoords(e);
+
+            if (activeTab === 'draw' && isDrawing && isDrawingMode) {
+                e.preventDefault(); // Stop mobile scrolling
+                currentStroke.points.push(coords);
+                renderCanvas();
+            } 
+            else if (activeTab === 'text' && isDraggingText && selectedTextIndex !== -1) {
+                e.preventDefault();
+                const targetText = texts[selectedTextIndex];
+                targetText.x = coords.x - textDragStartX;
+                targetText.y = coords.y - textDragStartY;
+                renderCanvas();
+            }
+        }
+
+        // Mouse Up / Touch End
+        function handleEnd() {
+            isDrawing = false;
+            currentStroke = null;
+            isDraggingText = false;
+        }
+
+        // Attach Mouse Events
+        canvas.addEventListener('mousedown', handleStart);
+        canvas.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+
+        // Attach Touch Events (For mobile devices)
+        canvas.addEventListener('touchstart', handleStart, { passive: false });
+        canvas.addEventListener('touchmove', handleMove, { passive: false });
+        canvas.addEventListener('touchend', handleEnd);
+
+        // Keyboard handler (Delete key to remove active text)
+        window.addEventListener('keydown', (e) => {
+            if (activeTab === 'text' && selectedTextIndex !== -1 && (e.key === 'Delete' || e.key === 'Backspace')) {
+                texts.splice(selectedTextIndex, 1);
+                selectedTextIndex = -1;
+                renderCanvas();
+                showToast("Texto eliminado");
+            }
+        });
+
+        // Reset All Button
+        btnReset.addEventListener('click', () => {
+            if (confirm("¿Estás seguro de que deseas restablecer todos los cambios realizados en esta imagen?")) {
+                resetEditorState();
+                renderCanvas();
+                showToast("Imagen restablecida al original");
+            }
+        });
+
+        // Download processed high quality image
+        btnDownload.addEventListener('click', () => {
+            if (!originalImage) return;
+
+            // Clear text highlights before exporting
+            const prevSelectIdx = selectedTextIndex;
+            selectedTextIndex = -1;
+            renderCanvas();
+
+            try {
+                // Get extension or default to png
+                const ext = currentImageName.split('.').pop().toLowerCase();
+                const mimeType = ext === 'png' ? 'image/png' : 'image/jpeg';
+                
+                // Browser-compatible canvas download stream
+                const dataURL = canvas.toDataURL(mimeType, 0.95);
+                const link = document.createElement('a');
+                
+                // Set appropriate filename with custom suffix
+                const cleanName = currentImageName.substring(0, currentImageName.lastIndexOf('.')) || currentImageName;
+                link.download = `${cleanName}_dmcstudio.${ext || 'png'}`;
+                link.href = dataURL;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showToast("¡Tu foto editada se descargó correctamente!");
+            } catch (err) {
+                showToast("Error al exportar: la imagen puede tener restricciones de seguridad.");
+                console.error(err);
+            }
+
+            // Restore selection index
+            selectedTextIndex = prevSelectIdx;
+            renderCanvas();
+        });
+
+        // Simple Custom System Notification
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            const toastMsg = document.getElementById('toast-message');
+            
+            toastMsg.textContent = message;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
