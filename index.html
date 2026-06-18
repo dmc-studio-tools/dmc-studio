@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DMCStudio - Editor de Fotos Sencillo</title>
+    <title>DMCStudio - Suite de Diseño Profesional</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Custom scrollbar for sidebar panels */
+        /* Personalización de scrollbars en los paneles de herramientas */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -24,7 +24,7 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #475569;
         }
-        /* Canvas workspace checkerboard background */
+        /* Fondo cuadriculado transparente clásico de suites de diseño */
         .checkerboard {
             background-color: #0b0f19;
             background-image: 
@@ -37,29 +37,37 @@
         }
     </style>
 </head>
-<body class="h-full flex flex-col overflow-hidden font-sans antialiased">
+<body class="h-full flex flex-col overflow-hidden font-sans antialiased select-none">
 
     <!-- Header Navigation -->
-    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between z-10 shrink-0">
+    <header class="bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex items-center justify-between z-10 shrink-0">
         <div class="flex items-center space-x-3">
-            <div class="bg-indigo-600 p-2 rounded-lg text-white">
-                <i data-lucide="aperture" class="w-6 h-6 animate-spin-slow"></i>
+            <div class="bg-gradient-to-tr from-indigo-600 to-purple-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/25">
+                <i data-lucide="sparkles" class="w-5 h-5 animate-pulse"></i>
             </div>
             <div>
-                <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">DMCStudio</h1>
-                <p class="text-xs text-slate-400">Editor de fotos rápido y sencillo</p>
+                <div class="flex items-center space-x-2">
+                    <h1 class="text-lg font-black tracking-wider bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">DMCStudio</h1>
+                    <span class="text-[10px] bg-indigo-950 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-800 font-bold uppercase tracking-widest">PRO SUITE</span>
+                </div>
+                <p class="text-[10px] text-slate-400">Editor, Vectorial & Layout Studio</p>
             </div>
         </div>
         
-        <!-- Action Buttons -->
+        <!-- Acciones principales -->
         <div class="flex items-center space-x-2">
-            <button id="btnReset" class="hidden px-4 py-2 text-sm font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition flex items-center space-x-1.5">
-                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                <span class="hidden sm:inline">Restablecer</span>
+            <button onclick="openNewProjectModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-750 border border-slate-700/60 rounded-lg transition flex items-center space-x-1">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Nuevo Lienzo</span>
             </button>
-            <button id="btnDownload" class="hidden px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 rounded-lg shadow-lg shadow-indigo-500/20 transition flex items-center space-x-1.5">
+            <div class="w-[1px] h-6 bg-slate-850"></div>
+            <button id="btnReset" class="hidden px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center space-x-1">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                <span>Reiniciar</span>
+            </button>
+            <button id="btnDownload" class="hidden px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 rounded-lg shadow-lg shadow-indigo-500/10 transition flex items-center space-x-1.5">
                 <i data-lucide="download" class="w-4 h-4"></i>
-                <span>Descargar</span>
+                <span>Exportar Diseño</span>
             </button>
         </div>
     </header>
@@ -67,280 +75,451 @@
     <!-- Main Workspace Container -->
     <main class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         
-        <!-- Left Panel: Sidebar controls -->
-        <aside id="sidebar" class="w-full md:w-80 bg-slate-900 border-t md:border-t-0 md:border-r border-slate-800 flex flex-col z-10 shrink-0 order-2 md:order-1 h-2/5 md:h-full">
-            <!-- Tool Tabs -->
-            <div class="flex border-b border-slate-800 bg-slate-950/50 text-xs font-semibold overflow-x-auto shrink-0">
-                <button onclick="switchTab('adjust')" id="tab-adjust" class="flex-1 py-3 px-2 text-center border-b-2 border-indigo-500 text-indigo-400 flex flex-col items-center gap-1 min-w-[70px]">
-                    <i data-lucide="sliders" class="w-4 h-4"></i>
-                    <span>Ajustes</span>
-                </button>
-                <button onclick="switchTab('filters')" id="tab-filters" class="flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex flex-col items-center gap-1 min-w-[70px]">
-                    <i data-lucide="palette" class="w-4 h-4"></i>
-                    <span>Filtros</span>
-                </button>
-                <button onclick="switchTab('draw')" id="tab-draw" class="flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex flex-col items-center gap-1 min-w-[70px]">
-                    <i data-lucide="brush" class="w-4 h-4"></i>
-                    <span>Dibujar</span>
-                </button>
-                <button onclick="switchTab('text')" id="tab-text" class="flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex flex-col items-center gap-1 min-w-[70px]">
-                    <i data-lucide="type" class="w-4 h-4"></i>
-                    <span>Texto</span>
-                </button>
-            </div>
+        <!-- Left Sidebar: Category select -->
+        <nav class="bg-slate-950 border-r border-slate-900 md:w-16 flex md:flex-col items-center justify-around md:justify-start md:py-4 gap-2 z-25 shrink-0 order-3 md:order-1 h-14 md:h-full">
+            <button onclick="switchCategory('canvas')" id="cat-canvas" class="category-btn active p-3 rounded-xl text-indigo-400 bg-slate-900 transition flex flex-col items-center gap-1 group" title="Lienzo y Fondo">
+                <i data-lucide="layout" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span class="text-[8px] font-semibold md:hidden">Lienzo</span>
+            </button>
+            <button onclick="switchCategory('crop')" id="cat-crop" class="category-btn p-3 rounded-xl text-slate-500 hover:text-slate-200 transition flex flex-col items-center gap-1 group" title="Cortar Lienzo">
+                <i data-lucide="crop" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span class="text-[8px] font-semibold md:hidden">Cortar</span>
+            </button>
+            <button onclick="switchCategory('images')" id="cat-images" class="category-btn p-3 rounded-xl text-slate-500 hover:text-slate-200 transition flex flex-col items-center gap-1 group" title="Imágenes e Ilustración">
+                <i data-lucide="image" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span class="text-[8px] font-semibold md:hidden">Fotos</span>
+            </button>
+            <button onclick="switchCategory('vectors')" id="cat-vectors" class="category-btn p-3 rounded-xl text-slate-500 hover:text-slate-200 transition flex flex-col items-center gap-1 group" title="Formas Vectoriales">
+                <i data-lucide="shapes" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span class="text-[8px] font-semibold md:hidden">Formas</span>
+            </button>
+            <button onclick="switchCategory('text')" id="cat-text" class="category-btn p-3 rounded-xl text-slate-500 hover:text-slate-200 transition flex flex-col items-center gap-1 group" title="Tipografías y Letras">
+                <i data-lucide="type" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span class="text-[8px] font-semibold md:hidden">Texto</span>
+            </button>
+            <button onclick="switchCategory('brush')" id="cat-brush" class="category-btn p-3 rounded-xl text-slate-500 hover:text-slate-200 transition flex flex-col items-center gap-1 group" title="Pincel y Dibujo">
+                <i data-lucide="brush" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span class="text-[8px] font-semibold md:hidden">Pincel</span>
+            </button>
+            <button onclick="switchCategory('adjust')" id="cat-adjust" class="category-btn p-3 rounded-xl text-slate-500 hover:text-slate-200 transition flex flex-col items-center gap-1 group" title="Ajustes y Photoshop Filters">
+                <i data-lucide="sliders" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span class="text-[8px] font-semibold md:hidden">Ajustes</span>
+            </button>
+            <div class="hidden md:block flex-1"></div>
+            <button onclick="switchCategory('layers')" id="cat-layers" class="category-btn p-3 rounded-xl text-slate-500 hover:text-slate-200 transition flex flex-col items-center gap-1 group relative" title="Gestor de Capas">
+                <i data-lucide="layers" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span id="layers-badge" class="absolute top-1.5 right-1.5 w-4 h-4 bg-indigo-500 text-[8px] font-bold text-white rounded-full flex items-center justify-center border border-slate-950">0</span>
+                <span class="text-[8px] font-semibold md:hidden">Capas</span>
+            </button>
+        </nav>
 
-            <!-- Tab Contents (Scrollable Container) -->
+        <!-- Middle Sidebar: Properties Panel of Selected Category -->
+        <aside id="sidebar" class="w-full md:w-80 bg-slate-900 border-t md:border-t-0 md:border-r border-slate-800 flex flex-col z-10 shrink-0 order-2 md:order-2 h-2/5 md:h-full">
             <div class="flex-1 overflow-y-auto p-5 space-y-6">
                 
-                <!-- Panel: ADJUST -->
-                <div id="panel-adjust" class="space-y-5">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-semibold text-slate-300">Ajustes Básicos</h3>
-                        <button onclick="resetSliders()" class="text-xs text-indigo-400 hover:text-indigo-300">Reiniciar</button>
-                    </div>
+                <!-- PANEL: CANVAS & TEMPLATES (Canva Style) -->
+                <div id="panel-canvas" class="space-y-5">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+                        <i data-lucide="layout" class="w-4 h-4 text-indigo-400"></i> Ajustes de Lienzo
+                    </h3>
                     
-                    <!-- Brillo -->
                     <div class="space-y-2">
-                        <div class="flex justify-between text-xs text-slate-400">
-                            <span class="flex items-center gap-1"><i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i> Brillo</span>
-                            <span id="val-brightness">100%</span>
+                        <label class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Color del Fondo</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="color" id="canvas-bg-color" value="#ffffff" oninput="changeCanvasBg(this.value)" class="w-8 h-8 rounded border-0 bg-transparent cursor-pointer p-0">
+                            <div class="flex gap-1 flex-1 overflow-x-auto py-1">
+                                <button onclick="changeCanvasBg('#ffffff')" class="w-5 h-5 rounded bg-white border border-slate-700"></button>
+                                <button onclick="changeCanvasBg('#f8fafc')" class="w-5 h-5 rounded bg-slate-50 border border-slate-700"></button>
+                                <button onclick="changeCanvasBg('#0f172a')" class="w-5 h-5 rounded bg-slate-900 border border-slate-700"></button>
+                                <button onclick="changeCanvasBg('#ec4899')" class="w-5 h-5 rounded bg-pink-500 border border-slate-750"></button>
+                                <button onclick="changeCanvasBg('#3b82f6')" class="w-5 h-5 rounded bg-blue-500 border border-slate-750"></button>
+                                <button onclick="changeCanvasBg('transparent')" class="w-5 h-5 rounded border border-slate-700 checkerboard" title="Transparente"></button>
+                            </div>
                         </div>
-                        <input type="range" id="slider-brightness" min="0" max="200" value="100" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
                     </div>
 
-                    <!-- Contraste -->
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-xs text-slate-400">
-                            <span class="flex items-center gap-1"><i data-lucide="contrast" class="w-3.5 h-3.5 text-blue-400"></i> Contraste</span>
-                            <span id="val-contrast">100%</span>
-                        </div>
-                        <input type="range" id="slider-contrast" min="0" max="200" value="100" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                    </div>
-
-                    <!-- Saturación -->
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-xs text-slate-400">
-                            <span class="flex items-center gap-1"><i data-lucide="droplet" class="w-3.5 h-3.5 text-pink-400"></i> Saturación</span>
-                            <span id="val-saturation">100%</span>
-                        </div>
-                        <input type="range" id="slider-saturation" min="0" max="200" value="100" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                    </div>
-
-                    <!-- Desenfoque -->
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-xs text-slate-400">
-                            <span class="flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i> Desenfoque (Blur)</span>
-                            <span id="val-blur">0px</span>
-                        </div>
-                        <input type="range" id="slider-blur" min="0" max="20" value="0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                    </div>
-
-                    <!-- Sepia -->
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-xs text-slate-400">
-                            <span class="flex items-center gap-1"><i data-lucide="sunset" class="w-3.5 h-3.5 text-orange-400"></i> Sepia</span>
-                            <span id="val-sepia">0%</span>
-                        </div>
-                        <input type="range" id="slider-sepia" min="0" max="100" value="0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                    </div>
-
-                    <!-- Escala de Grises -->
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-xs text-slate-400">
-                            <span class="flex items-center gap-1"><i data-lucide="eye-off" class="w-3.5 h-3.5 text-slate-400"></i> Escala de grises</span>
-                            <span id="val-grayscale">0%</span>
-                        </div>
-                        <input type="range" id="slider-grayscale" min="0" max="100" value="0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                    </div>
-
-                    <!-- Tono (Hue) -->
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-xs text-slate-400">
-                            <span class="flex items-center gap-1"><i data-lucide="palette" class="w-3.5 h-3.5 text-purple-400"></i> Rotación de tono</span>
-                            <span id="val-hue">0°</span>
-                        </div>
-                        <input type="range" id="slider-hue" min="0" max="360" value="0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                    </div>
-
-                    <!-- Transformaciones rápidas -->
-                    <div class="pt-2 border-t border-slate-800 space-y-3">
-                        <h4 class="text-xs font-semibold text-slate-400">Transformación rápida</h4>
-                        <div class="grid grid-cols-4 gap-2">
-                            <button onclick="rotateImage(-90)" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 hover:text-white transition flex flex-col items-center gap-1" title="Rotar izquierda">
-                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                                <span class="text-[9px]">-90°</span>
+                    <div class="pt-4 border-t border-slate-800/80 space-y-3">
+                        <label class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Plantillas Rápidas (Canva)</label>
+                        <div class="grid grid-cols-1 gap-2">
+                            <button onclick="setCanvasPreset(1080, 1080, 'Instagram Post')" class="flex justify-between items-center p-2.5 bg-slate-850 hover:bg-slate-800 rounded-lg text-left text-xs transition border border-slate-800/60">
+                                <div>
+                                    <div class="font-bold text-slate-200">Post de Instagram</div>
+                                    <div class="text-[10px] text-slate-400">1080 x 1080 px (1:1)</div>
+                                </div>
+                                <i data-lucide="instagram" class="w-4 h-4 text-slate-500"></i>
                             </button>
-                            <button onclick="rotateImage(90)" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 hover:text-white transition flex flex-col items-center gap-1" title="Rotar derecha">
-                                <i data-lucide="rotate-cw" class="w-4 h-4"></i>
-                                <span class="text-[9px]">+90°</span>
+                            <button onclick="setCanvasPreset(1080, 1920, 'Instagram Story')" class="flex justify-between items-center p-2.5 bg-slate-850 hover:bg-slate-800 rounded-lg text-left text-xs transition border border-slate-800/60">
+                                <div>
+                                    <div class="font-bold text-slate-200">Instagram Story</div>
+                                    <div class="text-[10px] text-slate-400">1080 x 1920 px (9:16)</div>
+                                </div>
+                                <i data-lucide="smartphone" class="w-4 h-4 text-slate-500"></i>
                             </button>
-                            <button onclick="flipImage('h')" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 hover:text-white transition flex flex-col items-center gap-1" title="Voltear Horizontal">
-                                <i data-lucide="flip-horizontal" class="w-4 h-4"></i>
-                                <span class="text-[9px]">Horizontal</span>
+                            <button onclick="setCanvasPreset(1280, 720, 'YouTube Thumbnail')" class="flex justify-between items-center p-2.5 bg-slate-850 hover:bg-slate-800 rounded-lg text-left text-xs transition border border-slate-800/60">
+                                <div>
+                                    <div class="font-bold text-slate-200">Miniatura YouTube</div>
+                                    <div class="text-[10px] text-slate-400">1280 x 720 px (16:9)</div>
+                                </div>
+                                <i data-lucide="youtube" class="w-4 h-4 text-slate-500"></i>
                             </button>
-                            <button onclick="flipImage('v')" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 hover:text-white transition flex flex-col items-center gap-1" title="Voltear Vertical">
-                                <i data-lucide="flip-vertical" class="w-4 h-4"></i>
-                                <span class="text-[9px]">Vertical</span>
+                            <button onclick="setCanvasPreset(842, 595, 'A4 Poster')" class="flex justify-between items-center p-2.5 bg-slate-850 hover:bg-slate-800 rounded-lg text-left text-xs transition border border-slate-800/60">
+                                <div>
+                                    <div class="font-bold text-slate-200">Póster A4 (Horizontal)</div>
+                                    <div class="text-[10px] text-slate-400">842 x 595 px</div>
+                                </div>
+                                <i data-lucide="file-text" class="w-4 h-4 text-slate-500"></i>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Panel: FILTERS -->
-                <div id="panel-filters" class="hidden space-y-4">
-                    <h3 class="text-sm font-semibold text-slate-300">Filtros Preestablecidos</h3>
-                    <div class="grid grid-cols-2 gap-3">
-                        <!-- Normal -->
-                        <button onclick="applyPresetFilter('normal')" class="preset-card group relative overflow-hidden rounded-lg border-2 border-indigo-500 bg-slate-800 text-left p-3 transition hover:bg-slate-750">
-                            <div class="text-xs font-bold text-slate-200">Original</div>
-                            <div class="text-[10px] text-slate-400 mt-1">Sin filtros aplicados</div>
+                <!-- PANEL: CROP (Cortar) -->
+                <div id="panel-crop" class="hidden space-y-4">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+                        <i data-lucide="crop" class="w-4 h-4 text-indigo-400"></i> Cortar Lienzo
+                    </h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Arrastra las esquinas del recuadro o muévelas para seleccionar el área que deseas conservar.</p>
+                    
+                    <div class="space-y-3 pt-2">
+                        <label class="text-xs text-slate-400 font-medium">Relación de Aspecto</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="setCropRatio('free')" id="ratio-free" class="py-2 px-3 bg-indigo-600/20 border border-indigo-500/50 text-indigo-300 rounded-lg text-xs font-semibold hover:bg-indigo-600/30 transition">Libre</button>
+                            <button onclick="setCropRatio('1:1')" id="ratio-1-1" class="py-2 px-3 bg-slate-800 border border-slate-700 text-slate-300 rounded-lg text-xs font-semibold hover:bg-slate-750 transition">1:1 (Cuadrado)</button>
+                            <button onclick="setCropRatio('16:9')" id="ratio-16-9" class="py-2 px-3 bg-slate-800 border border-slate-700 text-slate-300 rounded-lg text-xs font-semibold hover:bg-slate-750 transition">16:9 (Panorámico)</button>
+                            <button onclick="setCropRatio('4:3')" id="ratio-4-3" class="py-2 px-3 bg-slate-800 border border-slate-700 text-slate-300 rounded-lg text-xs font-semibold hover:bg-slate-750 transition">4:3 (Estándar)</button>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800 space-y-2">
+                        <button onclick="applyCanvasCrop()" class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-lg shadow-emerald-500/10">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            <span>Confirmar Recorte</span>
                         </button>
-                        <!-- Vintage -->
-                        <button onclick="applyPresetFilter('vintage')" class="preset-card group relative overflow-hidden rounded-lg border border-slate-800 bg-slate-800 text-left p-3 transition hover:bg-slate-750 hover:border-slate-700">
-                            <div class="text-xs font-bold text-amber-500">Retro Vintage</div>
-                            <div class="text-[10px] text-slate-400 mt-1">Tono cálido clásico</div>
-                        </button>
-                        <!-- Noir (Mono/Dark) -->
-                        <button onclick="applyPresetFilter('noir')" class="preset-card group relative overflow-hidden rounded-lg border border-slate-800 bg-slate-800 text-left p-3 transition hover:bg-slate-750 hover:border-slate-700">
-                            <div class="text-xs font-bold text-slate-300">Cine Noir</div>
-                            <div class="text-[10px] text-slate-400 mt-1">Alto contraste en B/N</div>
-                        </button>
-                        <!-- Warm / Sunset -->
-                        <button onclick="applyPresetFilter('warm')" class="preset-card group relative overflow-hidden rounded-lg border border-slate-800 bg-slate-800 text-left p-3 transition hover:bg-slate-750 hover:border-slate-700">
-                            <div class="text-xs font-bold text-orange-400">Atardecer</div>
-                            <div class="text-[10px] text-slate-400 mt-1">Colores ardientes</div>
-                        </button>
-                        <!-- Cool / Nordic -->
-                        <button onclick="applyPresetFilter('cool')" class="preset-card group relative overflow-hidden rounded-lg border border-slate-800 bg-slate-800 text-left p-3 transition hover:bg-slate-750 hover:border-slate-700">
-                            <div class="text-xs font-bold text-sky-400">Nórdico</div>
-                            <div class="text-[10px] text-slate-400 mt-1">Frío y minimalista</div>
-                        </button>
-                        <!-- Dramatic / Cyberpunk -->
-                        <button onclick="applyPresetFilter('dramatic')" class="preset-card group relative overflow-hidden rounded-lg border border-slate-800 bg-slate-800 text-left p-3 transition hover:bg-slate-750 hover:border-slate-700">
-                            <div class="text-xs font-bold text-purple-400">Cyberpunk</div>
-                            <div class="text-[10px] text-slate-400 mt-1">Tonalidades neón</div>
+                        <button onclick="resetCropArea()" class="w-full py-2 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold transition">
+                            Reiniciar Recuadro
                         </button>
                     </div>
                 </div>
 
-                <!-- Panel: DRAW -->
-                <div id="panel-draw" class="hidden space-y-4">
+                <!-- PANEL: IMAGES (Photoshop Photo Layer) -->
+                <div id="panel-images" class="hidden space-y-4">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+                        <i data-lucide="image" class="w-4 h-4 text-indigo-400"></i> Añadir Foto
+                    </h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Puedes incrustar múltiples fotografías como capas editables en tu lienzo de diseño.</p>
+                    
+                    <div class="pt-2">
+                        <button onclick="document.getElementById('layer-file-input').click()" class="w-full py-4 bg-indigo-600/10 hover:bg-indigo-600/20 border-2 border-dashed border-indigo-500/40 hover:border-indigo-500 text-indigo-300 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center gap-2">
+                            <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                            <span>Importar archivo de imagen</span>
+                        </button>
+                        <input type="file" id="layer-file-input" accept="image/*" class="hidden" onchange="addPhotoLayer(event)">
+                    </div>
+
+                    <!-- Stickers/Graphics section (Canva Elements style) -->
+                    <div class="pt-4 border-t border-slate-800 space-y-3">
+                        <label class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Gráficos Prediseñados (Stickers)</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="addEmojiLayer('😎')" class="p-3 bg-slate-850 hover:bg-slate-800 rounded-lg text-2xl transition">😎</button>
+                            <button onclick="addEmojiLayer('🔥')" class="p-3 bg-slate-850 hover:bg-slate-800 rounded-lg text-2xl transition">🔥</button>
+                            <button onclick="addEmojiLayer('✨')" class="p-3 bg-slate-850 hover:bg-slate-800 rounded-lg text-2xl transition">✨</button>
+                            <button onclick="addEmojiLayer('🎨')" class="p-3 bg-slate-850 hover:bg-slate-800 rounded-lg text-2xl transition">🎨</button>
+                            <button onclick="addEmojiLayer('🚀')" class="p-3 bg-slate-850 hover:bg-slate-800 rounded-lg text-2xl transition">🚀</button>
+                            <button onclick="addEmojiLayer('❤️')" class="p-3 bg-slate-850 hover:bg-slate-800 rounded-lg text-2xl transition">❤️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL: VECTORS (Corel Draw Vector Shapes) -->
+                <div id="panel-vectors" class="hidden space-y-4">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+                        <i data-lucide="shapes" class="w-4 h-4 text-indigo-400"></i> Formas Vectoriales
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="addShapeLayer('rect')" class="p-3 bg-slate-850 hover:bg-slate-800 hover:border-indigo-500 rounded-lg border border-slate-800/80 text-xs font-semibold text-slate-300 flex flex-col items-center gap-1.5 transition">
+                            <i data-lucide="square" class="w-5 h-5 text-indigo-400"></i> Rectángulo
+                        </button>
+                        <button onclick="addShapeLayer('circle')" class="p-3 bg-slate-850 hover:bg-slate-800 hover:border-indigo-500 rounded-lg border border-slate-800/80 text-xs font-semibold text-slate-300 flex flex-col items-center gap-1.5 transition">
+                            <i data-lucide="circle" class="w-5 h-5 text-purple-400"></i> Círculo
+                        </button>
+                        <button onclick="addShapeLayer('triangle')" class="p-3 bg-slate-850 hover:bg-slate-800 hover:border-indigo-500 rounded-lg border border-slate-800/80 text-xs font-semibold text-slate-300 flex flex-col items-center gap-1.5 transition">
+                            <i data-lucide="triangle" class="w-5 h-5 text-pink-400"></i> Triángulo
+                        </button>
+                        <button onclick="addShapeLayer('star')" class="p-3 bg-slate-850 hover:bg-slate-800 hover:border-indigo-500 rounded-lg border border-slate-800/80 text-xs font-semibold text-slate-300 flex flex-col items-center gap-1.5 transition">
+                            <i data-lucide="star" class="w-5 h-5 text-amber-400"></i> Estrella
+                        </button>
+                    </div>
+
+                    <!-- Shape Properties Panel (Contextual) -->
+                    <div id="shape-properties" class="hidden pt-4 border-t border-slate-800 space-y-4">
+                        <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-widest">Ajustes del Vector</h4>
+                        
+                        <!-- Relleno -->
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] text-slate-400 flex justify-between">
+                                <span>Color Relleno</span>
+                                <span id="val-shape-fill-hex">#ffffff</span>
+                            </label>
+                            <input type="color" id="shape-fill" class="w-full h-8 bg-transparent border-0 cursor-pointer p-0" oninput="updateActiveShapeProperty('fillColor', this.value)">
+                        </div>
+
+                        <!-- Borde / Trazo -->
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] text-slate-400 flex justify-between">
+                                <span>Color del Trazo (Borde)</span>
+                                <span id="val-shape-stroke-hex">#000000</span>
+                            </label>
+                            <input type="color" id="shape-stroke" class="w-full h-8 bg-transparent border-0 cursor-pointer p-0" oninput="updateActiveShapeProperty('strokeColor', this.value)">
+                        </div>
+
+                        <!-- Grosor Borde -->
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-[11px] text-slate-400">
+                                <span>Grosor del Trazo</span>
+                                <span id="val-shape-stroke-w">2px</span>
+                            </div>
+                            <input type="range" id="shape-stroke-width" min="0" max="20" value="2" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" oninput="updateActiveShapeProperty('strokeWidth', parseInt(this.value))">
+                        </div>
+
+                        <!-- Esquinas Redondeadas (solo para Rectángulos) -->
+                        <div id="prop-border-radius" class="space-y-1.5 hidden">
+                            <div class="flex justify-between text-[11px] text-slate-400">
+                                <span>Redondear Esquinas</span>
+                                <span id="val-shape-radius">0px</span>
+                            </div>
+                            <input type="range" id="shape-radius" min="0" max="100" value="0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" oninput="updateActiveShapeProperty('borderRadius', parseInt(this.value))">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL: TEXT (Canva Layout Style) -->
+                <div id="panel-text" class="hidden space-y-4">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+                        <i data-lucide="type" class="w-4 h-4 text-indigo-400"></i> Tipografía y Texto
+                    </h3>
+                    
+                    <div class="space-y-2">
+                        <input type="text" id="canvas-text-input" placeholder="Escribe algo increíble..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                        <button onclick="addTextLayer()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1.5">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Añadir Texto</span>
+                        </button>
+                    </div>
+
+                    <!-- Text Properties Panel (Contextual) -->
+                    <div id="text-properties" class="hidden pt-4 border-t border-slate-800 space-y-4">
+                        <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-widest">Edición de Texto</h4>
+                        
+                        <!-- Font Family -->
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] text-slate-400">Estilo Tipográfico</label>
+                            <select id="text-font" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 focus:outline-none" onchange="updateActiveTextProperty('fontFamily', this.value)">
+                                <option value="Arial, sans-serif">Sans-Serif (Arial)</option>
+                                <option value="'Courier New', monospace">Retro / Código</option>
+                                <option value="'Times New Roman', serif">Clásica / Elegante</option>
+                                <option value="Impact, sans-serif">Impactante / Cartel</option>
+                                <option value="Cursive, sans-serif">Cretiva / Escrita</option>
+                            </select>
+                        </div>
+
+                        <!-- Color de Letra -->
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] text-slate-400">Color del Texto</label>
+                            <input type="color" id="text-color" value="#ffffff" class="w-full h-8 bg-transparent border-0 cursor-pointer p-0" oninput="updateActiveTextProperty('color', this.value)">
+                        </div>
+
+                        <!-- Estilo de Letra botones -->
+                        <div class="grid grid-cols-3 gap-1">
+                            <button onclick="toggleTextStyle('bold')" id="text-btn-bold" class="py-1 bg-slate-800 hover:bg-slate-750 text-xs font-bold rounded">B</button>
+                            <button onclick="toggleTextStyle('italic')" id="text-btn-italic" class="py-1 bg-slate-800 hover:bg-slate-750 text-xs italic rounded">I</button>
+                            <button onclick="toggleTextStyle('shadow')" id="text-btn-shadow" class="py-1 bg-slate-800 hover:bg-slate-750 text-xs rounded">Sombra</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL: DRAW BRUSH -->
+                <div id="panel-brush" class="hidden space-y-4">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+                        <i data-lucide="brush" class="w-4 h-4 text-indigo-400"></i> Pincel de Mano Alzada
+                    </h3>
+                    
                     <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-semibold text-slate-300">Herramienta de Dibujo</h3>
-                        <!-- Toggle activation -->
+                        <span class="text-xs text-slate-400">Modo de Dibujo</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="chk-draw-active" class="sr-only peer" onchange="toggleDrawingMode()">
                             <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white"></div>
-                            <span class="ml-2 text-xs text-slate-400 font-medium">Activar</span>
                         </label>
                     </div>
 
                     <div class="space-y-4 pt-2">
                         <!-- Brush Color -->
-                        <div class="space-y-2">
-                            <label class="text-xs text-slate-400">Color del pincel</label>
-                            <div class="flex items-center space-x-3">
-                                <input type="color" id="draw-color" value="#4f46e5" class="w-10 h-10 border-0 bg-transparent cursor-pointer rounded-lg p-0">
-                                <div class="flex gap-1.5 flex-1 overflow-x-auto py-1">
-                                    <button onclick="setBrushColor('#ef4444')" class="w-6 h-6 rounded-full bg-red-500 border border-slate-700 flex-shrink-0 hover:scale-110 transition"></button>
-                                    <button onclick="setBrushColor('#22c55e')" class="w-6 h-6 rounded-full bg-green-500 border border-slate-700 flex-shrink-0 hover:scale-110 transition"></button>
-                                    <button onclick="setBrushColor('#3b82f6')" class="w-6 h-6 rounded-full bg-blue-500 border border-slate-700 flex-shrink-0 hover:scale-110 transition"></button>
-                                    <button onclick="setBrushColor('#eab308')" class="w-6 h-6 rounded-full bg-yellow-500 border border-slate-700 flex-shrink-0 hover:scale-110 transition"></button>
-                                    <button onclick="setBrushColor('#ffffff')" class="w-6 h-6 rounded-full bg-white border border-slate-700 flex-shrink-0 hover:scale-110 transition"></button>
-                                    <button onclick="setBrushColor('#000000')" class="w-6 h-6 rounded-full bg-black border border-slate-700 flex-shrink-0 hover:scale-110 transition"></button>
-                                </div>
-                            </div>
+                        <div class="space-y-1.5">
+                            <label class="text-xs text-slate-400">Color del Trazo</label>
+                            <input type="color" id="draw-color" value="#4f46e5" class="w-full h-8 bg-transparent border-0 cursor-pointer p-0">
                         </div>
 
                         <!-- Brush Size -->
                         <div class="space-y-2">
                             <div class="flex justify-between text-xs text-slate-400">
-                                <span>Tamaño del trazo</span>
+                                <span>Diámetro</span>
                                 <span id="val-brush-size">8px</span>
                             </div>
                             <input type="range" id="slider-brush-size" min="1" max="50" value="8" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" oninput="updateBrushSize(this.value)">
                         </div>
-
-                        <div class="pt-2">
-                            <button onclick="clearDrawings()" class="w-full py-2 bg-rose-950 hover:bg-rose-900 border border-rose-800/60 text-rose-300 rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1.5">
-                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                <span>Borrar todos los trazos</span>
-                            </button>
-                        </div>
+                        
+                        <button onclick="clearBrushDrawings()" class="w-full py-2 bg-rose-950/40 hover:bg-rose-900/40 border border-rose-900/40 text-rose-300 text-xs rounded-lg transition flex items-center justify-center gap-1">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <span>Borrar Trazos</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Panel: TEXT -->
-                <div id="panel-text" class="hidden space-y-4">
-                    <h3 class="text-sm font-semibold text-slate-300">Añadir Texto</h3>
+                <!-- PANEL: ADJUST (Photoshop Image Properties) -->
+                <div id="panel-adjust" class="hidden space-y-4">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+                        <i data-lucide="sliders" class="w-4 h-4 text-indigo-400"></i> Filtros de Imagen
+                    </h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Selecciona una capa de imagen para modificar sus parámetros de luz y color individuales.</p>
                     
-                    <div class="space-y-3">
-                        <input type="text" id="text-input" placeholder="Escribe tu texto aquí..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                        
-                        <div class="grid grid-cols-2 gap-2">
-                            <!-- Text Color -->
-                            <div class="space-y-1">
-                                <label class="text-[11px] text-slate-500">Color de texto</label>
-                                <input type="color" id="text-color" value="#ffffff" class="w-full h-8 bg-transparent border-0 cursor-pointer p-0">
+                    <div id="adjustments-panel-content" class="space-y-5 pt-2 opacity-50 pointer-events-none">
+                        <!-- Brillo -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs text-slate-400">
+                                <span>Brillo</span>
+                                <span id="val-brightness">100%</span>
                             </div>
-                            <!-- Font Size -->
-                            <div class="space-y-1">
-                                <label class="text-[11px] text-slate-500">Tamaño de letra</label>
-                                <input type="number" id="text-size" value="40" min="10" max="200" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-sm text-slate-100 focus:outline-none">
-                            </div>
+                            <input type="range" id="slider-brightness" min="0" max="200" value="100" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" oninput="updateActiveImageAdjust('brightness', this.value)">
                         </div>
 
-                        <div class="pt-2">
-                            <button id="btn-add-text" onclick="addTextOverlay()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1.5">
-                                <i data-lucide="plus" class="w-4 h-4"></i>
-                                <span>Insertar texto</span>
-                            </button>
+                        <!-- Contraste -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs text-slate-400">
+                                <span>Contraste</span>
+                                <span id="val-contrast">100%</span>
+                            </div>
+                            <input type="range" id="slider-contrast" min="0" max="200" value="100" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" oninput="updateActiveImageAdjust('contrast', this.value)">
                         </div>
 
-                        <!-- Hint -->
-                        <div class="p-3 bg-indigo-950/30 border border-indigo-900/40 rounded-lg">
-                            <p class="text-[10px] text-indigo-300 leading-relaxed">
-                                <i data-lucide="info" class="w-3 h-3 inline mr-1 mb-0.5"></i>
-                                Una vez añadido el texto, puedes arrastrarlo directamente con el ratón o el dedo sobre la foto para cambiar su posición.
-                            </p>
+                        <!-- Saturación -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs text-slate-400">
+                                <span>Saturación</span>
+                                <span id="val-saturation">100%</span>
+                            </div>
+                            <input type="range" id="slider-saturation" min="0" max="200" value="100" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" oninput="updateActiveImageAdjust('saturation', this.value)">
                         </div>
+
+                        <!-- Desenfoque (Blur) -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs text-slate-400">
+                                <span>Desenfoque (Blur)</span>
+                                <span id="val-blur">0px</span>
+                            </div>
+                            <input type="range" id="slider-blur" min="0" max="20" value="0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" oninput="updateActiveImageAdjust('blur', this.value)">
+                        </div>
+
+                        <!-- Grayscale -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs text-slate-400">
+                                <span>Gris</span>
+                                <span id="val-grayscale">0%</span>
+                            </div>
+                            <input type="range" id="slider-grayscale" min="0" max="100" value="0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" oninput="updateActiveImageAdjust('grayscale', this.value)">
+                        </div>
+
+                        <!-- Sepia -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs text-slate-400">
+                                <span>Sepia</span>
+                                <span id="val-sepia">0%</span>
+                            </div>
+                            <input type="range" id="slider-sepia" min="0" max="100" value="0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" oninput="updateActiveImageAdjust('sepia', this.value)">
+                        </div>
+                    </div>
+                    
+                    <div id="no-image-selected-alert" class="p-3 bg-slate-850 rounded-lg border border-slate-800 text-slate-400 text-xs text-center">
+                        Ninguna capa de imagen seleccionada actualmente.
+                    </div>
+                </div>
+
+                <!-- PANEL: LAYERS LIST (Photoshop Layer Stack) -->
+                <div id="panel-layers" class="hidden space-y-4">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+                        <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i> Orden de Capas
+                    </h3>
+                    <p class="text-xs text-slate-400">Controla la superposición de elementos, clona o bloquea componentes individuales de la composición.</p>
+                    
+                    <div id="layers-list-container" class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                        <!-- Las capas se inyectarán de forma dinámica mediante JavaScript -->
                     </div>
                 </div>
 
             </div>
         </aside>
 
-        <!-- Right Panel: Canvas workspace -->
-        <section class="flex-1 flex flex-col justify-between p-4 md:p-8 checkerboard overflow-hidden order-1 md:order-2 h-3/5 md:h-full relative">
+        <!-- Right / Central Workspace: Interactive Area -->
+        <section class="flex-1 flex flex-col justify-between p-4 md:p-8 checkerboard overflow-hidden order-1 md:order-3 relative h-3/5 md:h-full">
             
-            <!-- Upload Area (overlay when no image uploaded) -->
-            <div id="upload-container" class="absolute inset-0 flex flex-col items-center justify-center p-6 bg-slate-950/80 backdrop-blur-sm z-20 transition-all duration-300">
-                <div class="max-w-md w-full bg-slate-900/90 border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-8 text-center cursor-pointer transition-all shadow-2xl group" id="drop-zone">
-                    <input type="file" id="file-input" accept="image/*" class="hidden">
-                    <div class="w-16 h-16 bg-slate-800 group-hover:bg-indigo-600/10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all">
-                        <i data-lucide="image" class="w-8 h-8 text-slate-400 group-hover:text-indigo-400 transition-all"></i>
+            <!-- Welcome / Create Project Overlay -->
+            <div id="welcome-modal" class="absolute inset-0 flex flex-col items-center justify-center p-6 bg-slate-950/95 backdrop-blur-md z-30 transition-all duration-300">
+                <div class="max-w-xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl text-center space-y-6">
+                    <div class="w-16 h-16 mx-auto bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10">
+                        <i data-lucide="sparkles" class="w-8 h-8 text-white"></i>
                     </div>
-                    <h3 class="text-base font-bold text-slate-200">Sube tu fotografía</h3>
-                    <p class="text-xs text-slate-400 mt-2 mb-6">Arrastra y suelta tu archivo de imagen aquí, o haz clic para explorar tu equipo.</p>
-                    <button class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/25 transition">
-                        Seleccionar Archivo
-                    </button>
-                    <div class="mt-4 text-[10px] text-slate-500">Soporta PNG, JPEG, WEBP y más formatos. Todo el procesado ocurre en tu navegador para proteger tu privacidad.</div>
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-100">Te damos la bienvenida a DMCStudio</h2>
+                        <p class="text-xs text-slate-400 mt-1">La suite definitiva de diseño gráfico, ilustración y maquetación web.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <!-- Cargar imagen principal -->
+                        <div onclick="document.getElementById('welcome-file-input').click()" class="p-5 bg-slate-850 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500 rounded-xl cursor-pointer text-center group transition">
+                            <i data-lucide="image" class="w-8 h-8 text-indigo-400 mx-auto mb-2 group-hover:scale-110 transition"></i>
+                            <span class="block text-xs font-bold text-slate-200">Editar una Fotografía</span>
+                            <span class="block text-[10px] text-slate-500 mt-1">Sube una imagen y diséñala</span>
+                            <input type="file" id="welcome-file-input" accept="image/*" class="hidden" onchange="startWithImage(event)">
+                        </div>
+
+                        <!-- Lienzo en blanco -->
+                        <div onclick="setCanvasPreset(1080, 1080, 'Instagram Square')" class="p-5 bg-slate-850 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500 rounded-xl cursor-pointer text-center group transition">
+                            <i data-lucide="layout" class="w-8 h-8 text-purple-400 mx-auto mb-2 group-hover:scale-110 transition"></i>
+                            <span class="block text-xs font-bold text-slate-200">Lienzo en Blanco</span>
+                            <span class="block text-[10px] text-slate-500 mt-1">Maquetación o banner vacío</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Canvas Container (Active workspace) -->
+            <!-- Canvas Container Workspace -->
             <div class="flex-1 flex items-center justify-center w-full h-full relative overflow-hidden" id="canvas-wrapper">
-                <!-- Our dynamic Canvas representing the image and operations -->
-                <canvas id="photo-canvas" class="max-w-full max-h-full object-contain shadow-2xl transition-all duration-100 hidden cursor-default"></canvas>
+                <canvas id="photo-canvas" class="shadow-2xl max-w-full max-h-full transition-all duration-75"></canvas>
             </div>
 
-            <!-- Toolbar below canvas (only visible when image is loaded) -->
-            <div id="image-status-bar" class="hidden mt-4 shrink-0 bg-slate-900/90 border border-slate-800/80 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs text-slate-400 max-w-lg mx-auto w-full">
+            <!-- Floating Quick Toolbar for Selected Layer -->
+            <div id="quick-layer-bar" class="hidden absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900/90 border border-slate-800/80 px-4 py-2 rounded-xl flex items-center space-x-3.5 shadow-2xl z-20 backdrop-blur">
+                <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest border-r border-slate-800 pr-3" id="quick-layer-title">Capa</span>
+                <div class="flex items-center space-x-1.5">
+                    <button onclick="layerZIndexShift('top')" class="p-1.5 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition" title="Traer al frente">
+                        <i data-lucide="chevrons-up" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="layerZIndexShift('bottom')" class="p-1.5 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition" title="Enviar al fondo">
+                        <i data-lucide="chevrons-down" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="duplicateActiveLayer()" class="p-1.5 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition" title="Duplicar">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="deleteActiveLayer()" class="p-1.5 hover:bg-rose-950/50 rounded text-slate-400 hover:text-rose-400 transition" title="Eliminar">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Toolbar below canvas (only visible when image/canvas is active) -->
+            <div id="image-status-bar" class="hidden mt-4 shrink-0 bg-slate-900/90 border border-slate-800/80 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs text-slate-400 max-w-xl mx-auto w-full">
                 <span id="img-resolution" class="flex items-center gap-1"><i data-lucide="maximize-2" class="w-3.5 h-3.5 text-slate-500"></i> --x-- px</span>
-                <span id="img-name" class="truncate max-w-[150px] font-medium text-slate-300">imagen.jpg</span>
-                <button onclick="triggerNewUpload()" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
-                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Cambiar imagen
+                <span id="img-name" class="truncate max-w-[200px] font-medium text-slate-300">Proyecto DMCStudio</span>
+                <button onclick="openNewProjectModal()" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Cambiar Proyecto
                 </button>
             </div>
 
@@ -352,349 +531,380 @@
         <div class="p-1 rounded-full bg-emerald-500/10 text-emerald-500">
             <i data-lucide="check-circle" class="w-5 h-5"></i>
         </div>
-        <span class="text-sm" id="toast-message">Mensaje del sistema</span>
+        <span class="text-sm" id="toast-message">Mensaje de DMCStudio</span>
     </div>
 
-    <!-- Core Editor JS Script -->
+    <!-- Core Studio Engine script -->
     <script>
-        // Init Lucide Icons
+        // Initialize Lucide Icons
         lucide.createIcons();
 
-        // Canvas & Context Setup
+        // Canvas Setup & Elements
         const canvas = document.getElementById('photo-canvas');
         const ctx = canvas.getContext('2d');
-        const fileInput = document.getElementById('file-input');
-        const dropZone = document.getElementById('drop-zone');
-        const uploadContainer = document.getElementById('upload-container');
-        const canvasWrapper = document.getElementById('canvas-wrapper');
+        const welcomeModal = document.getElementById('welcome-modal');
+        const imageStatusBar = document.getElementById('image-status-bar');
         const imgResolution = document.getElementById('img-resolution');
         const imgName = document.getElementById('img-name');
-        const imageStatusBar = document.getElementById('image-status-bar');
         const btnReset = document.getElementById('btnReset');
         const btnDownload = document.getElementById('btnDownload');
 
-        // Application State
-        let originalImage = null; // Storing original image instance
-        let currentImageName = "imagen.jpg";
-        let activeTab = 'adjust';
-        
-        // Active sliders state
-        const adjustments = {
-            brightness: 100,
-            contrast: 100,
-            saturation: 100,
-            blur: 0,
-            sepia: 0,
-            grayscale: 0,
-            hue: 0
-        };
+        // Application State System
+        let projectWidth = 1000;
+        let projectHeight = 1000;
+        let canvasBgColor = '#ffffff';
+        let activeCategory = 'canvas';
 
-        // Rotation & Flip state
-        let rotationAngle = 0; // 0, 90, 180, 270 degrees
-        let flipH = false;
-        let flipV = false;
+        // Layers array (Core Vector/Matrix Engine)
+        let layers = [];
+        let selectedLayerId = null;
 
-        // Interactive drawing tool state
+        // Interactive transformation tools
+        let draggingLayer = false;
+        let draggingHandle = null; // 'tl', 'tr', 'bl', 'br', 'rot'
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let layerOrigX = 0, layerOrigY = 0, layerOrigW = 0, layerOrigH = 0, layerOrigRot = 0;
+
+        // Drawing Brush State
         let isDrawingMode = false;
         let isDrawing = false;
         let brushColor = '#4f46e5';
         let brushSize = 8;
-        let drawings = []; // Stores strokes: { points: [{x, y}], color, size }
-        let currentStroke = null;
+        let currentDrawingPoints = [];
 
-        // Interactive text tool state
-        let texts = []; // Stores texts: { text, x, y, size, color, isDragging }
-        let selectedTextIndex = -1;
-        let isDraggingText = false;
-        let textDragStartX = 0;
-        let textDragStartY = 0;
+        // Interactive crop tool state
+        let cropArea = { x: 0, y: 0, w: 0, h: 0 };
+        let cropRatio = 'free'; // 'free', '1:1', '16:9', '4:3'
+        let draggingCropHandle = null; // 'tl', 'tr', 'bl', 'br'
+        let draggingCropArea = false;
+        let cropDragStartX = 0;
+        let cropDragStartY = 0;
 
-        // Initialize drag & drop listeners
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                dropZone.classList.add('border-indigo-500', 'bg-indigo-600/5');
-            }, false);
-        });
+        // App Start-up
+        function openNewProjectModal() {
+            welcomeModal.classList.remove('opacity-0', 'pointer-events-none');
+        }
 
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('border-indigo-500', 'bg-indigo-600/5');
-            }, false);
-        });
+        function closeNewProjectModal() {
+            welcomeModal.classList.add('opacity-0', 'pointer-events-none');
+            imageStatusBar.classList.remove('hidden');
+            btnReset.classList.remove('hidden');
+            btnDownload.classList.remove('hidden');
+        }
 
-        dropZone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
-        });
+        // Initialize Blank Project
+        function setCanvasPreset(width, height, name = "Lienzo DMCStudio") {
+            projectWidth = width;
+            projectHeight = height;
+            layers = [];
+            selectedLayerId = null;
 
-        dropZone.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFile(e.target.files[0]);
-            }
-        });
+            imgName.textContent = name;
+            closeNewProjectModal();
+            renderCanvas();
+            updateLayersUI();
+            showToast(`¡Proyecto "${name}" inicializado!`);
+        }
 
-        // Load & Initialize image
-        function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                showToast("Por favor, selecciona un archivo de tipo imagen válido.");
+        // Start by uploading a main photo (Photoshop flow)
+        function startWithImage(event) {
+            const file = event.target.files[0];
+            if (!file || !file.type.startsWith('image/')) {
+                showToast("Sube un formato de imagen válido.");
                 return;
             }
 
-            currentImageName = file.name;
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
-                    originalImage = img;
-                    resetEditorState();
-                    
-                    // Setup UI elements
-                    uploadContainer.classList.add('opacity-0', 'pointer-events-none');
-                    canvas.classList.remove('hidden');
-                    imageStatusBar.classList.remove('hidden');
-                    btnReset.classList.remove('hidden');
-                    btnDownload.classList.remove('hidden');
-                    
+                    projectWidth = img.naturalWidth;
+                    projectHeight = img.naturalHeight;
+                    layers = [];
+                    selectedLayerId = null;
+
+                    // Add image as first layer
+                    const layerId = generateId();
+                    layers.push({
+                        id: layerId,
+                        type: 'image',
+                        name: file.name,
+                        imgElement: img,
+                        x: 0,
+                        y: 0,
+                        w: projectWidth,
+                        h: projectHeight,
+                        rotation: 0,
+                        opacity: 1,
+                        locked: false,
+                        adjustments: {
+                            brightness: 100,
+                            contrast: 100,
+                            saturation: 100,
+                            blur: 0,
+                            grayscale: 0,
+                            sepia: 0
+                        }
+                    });
+
+                    selectedLayerId = layerId;
+                    imgName.textContent = file.name;
+                    closeNewProjectModal();
                     renderCanvas();
-                    showToast("¡Imagen cargada correctamente!");
+                    updateLayersUI();
+                    showToast("¡Imagen de fondo cargada correctamente!");
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        // Reset overall editor state to default values
-        function resetEditorState() {
-            adjustments.brightness = 100;
-            adjustments.contrast = 100;
-            adjustments.saturation = 100;
-            adjustments.blur = 0;
-            adjustments.sepia = 0;
-            adjustments.grayscale = 0;
-            adjustments.hue = 0;
-
-            rotationAngle = 0;
-            flipH = false;
-            flipV = false;
-
-            drawings = [];
-            texts = [];
-            isDrawingMode = false;
-            document.getElementById('chk-draw-active').checked = false;
-            canvas.style.cursor = 'default';
-
-            resetSliderElements();
-            applyPresetUIHighlight('normal');
+        // Generate ID
+        function generateId() {
+            return 'layer_' + Math.random().toString(36).substr(2, 9);
         }
 
-        function resetSliderElements() {
-            document.getElementById('slider-brightness').value = 100;
-            document.getElementById('slider-contrast').value = 100;
-            document.getElementById('slider-saturation').value = 100;
-            document.getElementById('slider-blur').value = 0;
-            document.getElementById('slider-sepia').value = 0;
-            document.getElementById('slider-grayscale').value = 0;
-            document.getElementById('slider-hue').value = 0;
-
-            updateSliderLabel('brightness', '100%');
-            updateSliderLabel('contrast', '100%');
-            updateSliderLabel('saturation', '100%');
-            updateSliderLabel('blur', '0px');
-            updateSliderLabel('sepia', '0%');
-            updateSliderLabel('grayscale', '0%');
-            updateSliderLabel('hue', '0°');
+        // Background Color changer
+        function changeCanvasBg(color) {
+            canvasBgColor = color;
+            document.getElementById('canvas-bg-color').value = color === 'transparent' ? '#ffffff' : color;
+            renderCanvas();
         }
 
-        function triggerNewUpload() {
-            fileInput.value = '';
-            uploadContainer.classList.remove('opacity-0', 'pointer-events-none');
-            canvas.classList.add('hidden');
-            imageStatusBar.classList.add('hidden');
-            btnReset.classList.add('hidden');
-            btnDownload.classList.add('hidden');
-            originalImage = null;
-        }
-
-        // Handle tabs switcher
-        function switchTab(tabName) {
-            activeTab = tabName;
+        // Change categories in the left sidebar
+        function switchCategory(cat) {
+            activeCategory = cat;
             
-            // Hide all panels
-            ['adjust', 'filters', 'draw', 'text'].forEach(t => {
-                document.getElementById(`panel-${t}`).classList.add('hidden');
-                
-                // Reset active tab button styles
-                const btn = document.getElementById(`tab-${t}`);
-                btn.className = "flex-1 py-3 px-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex flex-col items-center gap-1 min-w-[70px]";
+            // Toggle active styles in buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-indigo-400', 'bg-slate-900');
+                btn.classList.add('text-slate-500');
             });
+            document.getElementById(`cat-${cat}`).classList.add('active', 'text-indigo-400', 'bg-slate-900');
 
-            // Show active panel
-            document.getElementById(`panel-${tabName}`).classList.remove('hidden');
-            
-            // Set active styles for clicked tab button
-            const activeBtn = document.getElementById(`tab-${tabName}`);
-            activeBtn.className = "flex-1 py-3 px-2 text-center border-b-2 border-indigo-500 text-indigo-400 flex flex-col items-center gap-1 min-w-[70px]";
+            // Hide panels and show the correct one
+            ['canvas', 'crop', 'images', 'vectors', 'text', 'brush', 'adjust', 'layers'].forEach(p => {
+                document.getElementById(`panel-${p}`).classList.add('hidden');
+            });
+            document.getElementById(`panel-${cat}`).classList.remove('hidden');
 
-            // Handle special tab cursors
+            // Set drawing state based on category selection
+            if (cat !== 'brush') {
+                isDrawingMode = false;
+                document.getElementById('chk-draw-active').checked = false;
+            }
+
+            if (cat === 'crop') {
+                selectedLayerId = null; // Deselect active layer to crop canvas cleanly
+                initCropArea();
+            }
+
             updateWorkspaceCursor();
+            renderCanvas();
         }
 
         function updateWorkspaceCursor() {
-            if (!originalImage) return;
-            if (activeTab === 'draw' && isDrawingMode) {
+            if (isDrawingMode) {
                 canvas.style.cursor = 'crosshair';
-            } else if (activeTab === 'text') {
+            } else if (activeCategory === 'text') {
                 canvas.style.cursor = 'text';
+            } else if (activeCategory === 'crop') {
+                canvas.style.cursor = 'move';
             } else {
                 canvas.style.cursor = 'default';
             }
         }
 
-        // Real-time Slider listeners
-        const sliders = ['brightness', 'contrast', 'saturation', 'blur', 'sepia', 'grayscale', 'hue'];
-        sliders.forEach(sliderName => {
-            const slider = document.getElementById(`slider-${sliderName}`);
-            slider.addEventListener('input', (e) => {
-                let val = e.target.value;
-                adjustments[sliderName] = parseInt(val);
-                
-                let unit = '%';
-                if (sliderName === 'blur') unit = 'px';
-                if (sliderName === 'hue') unit = '°';
-                
-                updateSliderLabel(sliderName, `${val}${unit}`);
-                renderCanvas();
-            });
-        });
+        // ADD LAYERS: Image
+        function addPhotoLayer(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-        function updateSliderLabel(name, value) {
-            document.getElementById(`val-${name}`).textContent = value;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const layerId = generateId();
+                    
+                    // Fit image layer elegantly inside canvas center
+                    const maxW = projectWidth * 0.7;
+                    const maxH = projectHeight * 0.7;
+                    let w = img.naturalWidth;
+                    let h = img.naturalHeight;
+
+                    if (w > maxW) {
+                        h = (maxW / w) * h;
+                        w = maxW;
+                    }
+                    if (h > maxH) {
+                        w = (maxH / h) * w;
+                        h = maxH;
+                    }
+
+                    const x = (projectWidth - w) / 2;
+                    const y = (projectHeight - h) / 2;
+
+                    layers.push({
+                        id: layerId,
+                        type: 'image',
+                        name: file.name,
+                        imgElement: img,
+                        x: x,
+                        y: y,
+                        w: w,
+                        h: h,
+                        rotation: 0,
+                        opacity: 1,
+                        locked: false,
+                        adjustments: {
+                            brightness: 100,
+                            contrast: 100,
+                            saturation: 100,
+                            blur: 0,
+                            grayscale: 0,
+                            sepia: 0
+                        }
+                    });
+
+                    selectedLayerId = layerId;
+                    renderCanvas();
+                    updateLayersUI();
+                    switchCategory('adjust'); // Open Photoshop panel automatically
+                    showToast("Capa de imagen añadida");
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
-        function resetSliders() {
-            resetSliderElements();
-            sliders.forEach(sliderName => {
-                adjustments[sliderName] = sliderName === 'brightness' || sliderName === 'contrast' || sliderName === 'saturation' ? 100 : 0;
+        // ADD LAYERS: Stickers / Emojis (Canva elements)
+        function addEmojiLayer(emoji) {
+            const layerId = generateId();
+            const size = Math.min(projectWidth, projectHeight) * 0.25;
+            const x = (projectWidth - size) / 2;
+            const y = (projectHeight - size) / 2;
+
+            layers.push({
+                id: layerId,
+                type: 'emoji',
+                name: `Emoji ${emoji}`,
+                emoji: emoji,
+                x: x,
+                y: y,
+                w: size,
+                h: size,
+                rotation: 0,
+                opacity: 1,
+                locked: false
             });
+
+            selectedLayerId = layerId;
             renderCanvas();
+            updateLayersUI();
+            showToast("Ilustración añadida");
         }
 
-        // Predefined filter application
-        function applyPresetFilter(filterType) {
-            resetSliders();
-            applyPresetUIHighlight(filterType);
+        // ADD LAYERS: Vector Shape (Corel Draw Elements)
+        function addShapeLayer(shapeType) {
+            const layerId = generateId();
+            const size = Math.min(projectWidth, projectHeight) * 0.3;
+            const x = (projectWidth - size) / 2;
+            const y = (projectHeight - size) / 2;
 
-            switch(filterType) {
-                case 'vintage':
-                    adjustments.sepia = 40;
-                    adjustments.contrast = 95;
-                    adjustments.saturation = 80;
-                    document.getElementById('slider-sepia').value = 40;
-                    document.getElementById('slider-contrast').value = 95;
-                    document.getElementById('slider-saturation').value = 80;
-                    updateSliderLabel('sepia', '40%');
-                    updateSliderLabel('contrast', '95%');
-                    updateSliderLabel('saturation', '80%');
-                    break;
-                case 'noir':
-                    adjustments.grayscale = 100;
-                    adjustments.contrast = 140;
-                    adjustments.brightness = 90;
-                    document.getElementById('slider-grayscale').value = 100;
-                    document.getElementById('slider-contrast').value = 140;
-                    document.getElementById('slider-brightness').value = 90;
-                    updateSliderLabel('grayscale', '100%');
-                    updateSliderLabel('contrast', '140%');
-                    updateSliderLabel('brightness', '90%');
-                    break;
-                case 'warm':
-                    adjustments.hue = 15;
-                    adjustments.saturation = 130;
-                    adjustments.brightness = 105;
-                    document.getElementById('slider-hue').value = 15;
-                    document.getElementById('slider-saturation').value = 130;
-                    document.getElementById('slider-brightness').value = 105;
-                    updateSliderLabel('hue', '15°');
-                    updateSliderLabel('saturation', '130%');
-                    updateSliderLabel('brightness', '105%');
-                    break;
-                case 'cool':
-                    adjustments.hue = 190;
-                    adjustments.saturation = 85;
-                    adjustments.contrast = 110;
-                    document.getElementById('slider-hue').value = 190;
-                    document.getElementById('slider-saturation').value = 85;
-                    document.getElementById('slider-contrast').value = 110;
-                    updateSliderLabel('hue', '190°');
-                    updateSliderLabel('saturation', '85%');
-                    updateSliderLabel('contrast', '110%');
-                    break;
-                case 'dramatic':
-                    adjustments.hue = 300;
-                    adjustments.saturation = 150;
-                    adjustments.contrast = 130;
-                    document.getElementById('slider-hue').value = 300;
-                    document.getElementById('slider-saturation').value = 150;
-                    document.getElementById('slider-contrast').value = 130;
-                    updateSliderLabel('hue', '300°');
-                    updateSliderLabel('saturation', '150%');
-                    updateSliderLabel('contrast', '130%');
-                    break;
-                case 'normal':
-                default:
-                    // Already resetted to base 0/100 state
-                    break;
+            layers.push({
+                id: layerId,
+                type: 'shape',
+                name: `Vector ${shapeType.toUpperCase()}`,
+                shapeType: shapeType, // 'rect', 'circle', 'triangle', 'star'
+                x: x,
+                y: y,
+                w: size,
+                h: size,
+                rotation: 0,
+                opacity: 1,
+                locked: false,
+                fillColor: '#6366f1',
+                strokeColor: '#312e81',
+                strokeWidth: 3,
+                borderRadius: 8 // default for rect
+            });
+
+            selectedLayerId = layerId;
+            renderCanvas();
+            updateLayersUI();
+            
+            // Select properties panel contextually
+            document.getElementById('shape-properties').classList.remove('hidden');
+            if (shapeType === 'rect') {
+                document.getElementById('prop-border-radius').classList.remove('hidden');
+            } else {
+                document.getElementById('prop-border-radius').classList.add('hidden');
             }
-            renderCanvas();
-            showToast(`Filtro "${filterType.toUpperCase()}" aplicado`);
+
+            // Sync controls values
+            document.getElementById('shape-fill').value = '#6366f1';
+            document.getElementById('shape-stroke').value = '#312e81';
+            document.getElementById('shape-stroke-width').value = 3;
+            document.getElementById('shape-radius').value = 8;
+            document.getElementById('val-shape-fill-hex').textContent = '#6366f1';
+            document.getElementById('val-shape-stroke-hex').textContent = '#312e81';
+
+            showToast(`Forma de tipo ${shapeType} agregada`);
         }
 
-        // Predefined selection highlighter
-        function applyPresetUIHighlight(filterType) {
-            const cards = document.querySelectorAll('.preset-card');
-            cards.forEach(card => {
-                card.classList.remove('border-indigo-500');
-                card.classList.add('border-slate-800');
+        // ADD LAYERS: Advanced Text Layer (Canva Typography)
+        function addTextLayer() {
+            const inputVal = document.getElementById('canvas-text-input').value.trim();
+            const text = inputVal || "Haz doble clic para editar";
+
+            const layerId = generateId();
+            const size = Math.min(projectWidth, projectHeight) * 0.4;
+            const x = (projectWidth - size) / 2;
+            const y = (projectHeight - 60) / 2;
+
+            layers.push({
+                id: layerId,
+                type: 'text',
+                name: `Texto: ${text.substring(0, 15)}`,
+                text: text,
+                x: x,
+                y: y,
+                w: size,
+                h: 80,
+                rotation: 0,
+                opacity: 1,
+                locked: false,
+                color: '#ffffff',
+                fontFamily: 'Arial, sans-serif',
+                fontSize: 32,
+                fontWeight: 'bold', // 'bold' / 'normal'
+                fontStyle: 'normal', // 'italic' / 'normal'
+                textShadow: true
             });
-            const presets = ['normal', 'vintage', 'noir', 'warm', 'cool', 'dramatic'];
-            const index = presets.indexOf(filterType);
-            if (index !== -1 && cards[index]) {
-                cards[index].classList.remove('border-slate-800');
-                cards[index].classList.add('border-indigo-500');
-            }
-        }
 
-        // Rotate Image
-        function rotateImage(angle) {
-            rotationAngle = (rotationAngle + angle + 360) % 360;
+            selectedLayerId = layerId;
+            document.getElementById('canvas-text-input').value = '';
             renderCanvas();
+            updateLayersUI();
+
+            // Setup Text panel syncs
+            document.getElementById('text-properties').classList.remove('hidden');
+            document.getElementById('text-color').value = '#ffffff';
+            document.getElementById('text-font').value = 'Arial, sans-serif';
+
+            showToast("Capa de texto agregada");
         }
 
-        // Flip Image
-        function flipImage(dir) {
-            if (dir === 'h') flipH = !flipH;
-            if (dir === 'v') flipV = !flipV;
-            renderCanvas();
-        }
-
-        // Drawing Controls
+        // Brush drawing trigger
         function toggleDrawingMode() {
             isDrawingMode = document.getElementById('chk-draw-active').checked;
             updateWorkspaceCursor();
             if (isDrawingMode) {
-                showToast("Modo dibujo activado. Pinta sobre la foto.");
+                selectedLayerId = null; // deselect layer to paint peacefully
+                renderCanvas();
+                showToast("Modo pincel activado");
             }
-        }
-
-        function setBrushColor(color) {
-            brushColor = color;
-            document.getElementById('draw-color').value = color;
         }
 
         function updateBrushSize(val) {
@@ -702,56 +912,644 @@
             document.getElementById('val-brush-size').textContent = `${val}px`;
         }
 
-        document.getElementById('draw-color').addEventListener('input', (e) => {
-            brushColor = e.target.value;
-        });
-
-        function clearDrawings() {
-            if (drawings.length === 0) return;
-            drawings = [];
+        function clearBrushDrawings() {
+            layers = layers.filter(layer => layer.type !== 'drawing');
             renderCanvas();
-            showToast("Dibujos eliminados.");
+            updateLayersUI();
+            showToast("Lienzo de dibujo borrado");
         }
 
-        // Text Controls
-        function addTextOverlay() {
-            const txtInput = document.getElementById('text-input');
-            const textValue = txtInput.value.trim();
-            if (!textValue) {
-                showToast("Por favor, introduce un texto antes de insertar.");
+        // CROP AREA ENGINE (Lienzo / Canva Crop)
+        function initCropArea() {
+            if (layers.length === 0 && canvasBgColor === 'transparent') return;
+            const margin = 0.1; // 10% margin initial area
+            cropArea.x = projectWidth * margin;
+            cropArea.y = projectHeight * margin;
+            cropArea.w = projectWidth * (1 - margin * 2);
+            cropArea.h = projectHeight * (1 - margin * 2);
+
+            adjustCropAreaToRatio();
+        }
+
+        function adjustCropAreaToRatio() {
+            if (cropRatio === 'free') return;
+
+            let targetRatio = 1;
+            if (cropRatio === '1:1') targetRatio = 1;
+            if (cropRatio === '16:9') targetRatio = 16 / 9;
+            if (cropRatio === '4:3') targetRatio = 4 / 3;
+
+            let newW = cropArea.w;
+            let newH = newW / targetRatio;
+
+            if (newH > projectHeight - cropArea.y) {
+                newH = projectHeight - cropArea.y * 2;
+                newW = newH * targetRatio;
+            }
+
+            cropArea.w = newW;
+            cropArea.h = newH;
+        }
+
+        function setCropRatio(ratio) {
+            cropRatio = ratio;
+            ['free', '1-1', '16-9', '4-3'].forEach(r => {
+                const btn = document.getElementById(`ratio-${r}`);
+                if (r === ratio.replace(':', '-')) {
+                    btn.className = "py-2 px-3 bg-indigo-600/20 border border-indigo-500/50 text-indigo-300 rounded-lg text-xs font-semibold hover:bg-indigo-600/30 transition";
+                } else {
+                    btn.className = "py-2 px-3 bg-slate-800 border border-slate-700 text-slate-300 rounded-lg text-xs font-semibold hover:bg-slate-750 transition";
+                }
+            });
+            initCropArea();
+            renderCanvas();
+        }
+
+        function resetCropArea() {
+            initCropArea();
+            renderCanvas();
+            showToast("Recuadro de corte restablecido");
+        }
+
+        function applyCanvasCrop() {
+            if (layers.length === 0 && canvasBgColor === 'transparent') {
+                showToast("No hay contenido para recortar.");
                 return;
             }
 
-            const size = parseInt(document.getElementById('text-size').value) || 30;
-            const color = document.getElementById('text-color').value;
+            // Shift coordinates of all elements to preserve alignment relative to new origin
+            layers.forEach(layer => {
+                layer.x -= cropArea.x;
+                layer.y -= cropArea.y;
 
-            // Compute center of original image coordinates to put text nicely
-            let targetX = canvas.width / 2;
-            let targetY = canvas.height / 2;
-
-            texts.push({
-                text: textValue,
-                x: targetX,
-                y: targetY,
-                size: size,
-                color: color,
-                isDragging: false
+                // Shift freehand drawing coordinate arrays
+                if (layer.type === 'drawing' && layer.strokes) {
+                    layer.strokes.forEach(pt => {
+                        pt.x -= cropArea.x;
+                        pt.y -= cropArea.y;
+                    });
+                }
             });
 
-            txtInput.value = ''; // clear input
-            renderCanvas();
-            showToast("Texto insertado. Arrástralo a la posición idónea.");
+            // Set new project size bounding boxes
+            projectWidth = Math.round(cropArea.w);
+            projectHeight = Math.round(cropArea.h);
+
+            selectedLayerId = null;
+            switchCategory('canvas');
+            showToast("¡Lienzo recortado correctamente!");
         }
 
-        // Coordinate calculations for canvas scaling
+        // Contextual Shapes settings updater
+        function updateActiveShapeProperty(prop, value) {
+            if (!selectedLayerId) return;
+            const layer = layers.find(l => l.id === selectedLayerId);
+            if (layer && layer.type === 'shape') {
+                layer[prop] = value;
+                
+                // Display text labels
+                if (prop === 'fillColor') document.getElementById('val-shape-fill-hex').textContent = value;
+                if (prop === 'strokeColor') document.getElementById('val-shape-stroke-hex').textContent = value;
+                if (prop === 'strokeWidth') document.getElementById('val-shape-stroke-w').textContent = `${value}px`;
+                if (prop === 'borderRadius') document.getElementById('val-shape-radius').textContent = `${value}px`;
+
+                renderCanvas();
+            }
+        }
+
+        // Contextual Text settings updater
+        function updateActiveTextProperty(prop, value) {
+            if (!selectedLayerId) return;
+            const layer = layers.find(l => l.id === selectedLayerId);
+            if (layer && layer.type === 'text') {
+                layer[prop] = value;
+                renderCanvas();
+            }
+        }
+
+        function toggleTextStyle(style) {
+            if (!selectedLayerId) return;
+            const layer = layers.find(l => l.id === selectedLayerId);
+            if (layer && layer.type === 'text') {
+                if (style === 'bold') {
+                    layer.fontWeight = layer.fontWeight === 'bold' ? 'normal' : 'bold';
+                    document.getElementById('text-btn-bold').classList.toggle('bg-indigo-600', layer.fontWeight === 'bold');
+                }
+                if (style === 'italic') {
+                    layer.fontStyle = layer.fontStyle === 'italic' ? 'normal' : 'italic';
+                    document.getElementById('text-btn-italic').classList.toggle('bg-indigo-600', layer.fontStyle === 'italic');
+                }
+                if (style === 'shadow') {
+                    layer.textShadow = !layer.textShadow;
+                    document.getElementById('text-btn-shadow').classList.toggle('bg-indigo-600', layer.textShadow);
+                }
+                renderCanvas();
+            }
+        }
+
+        // Contextual Photoshop Ajustes
+        function updateActiveImageAdjust(adjust, val) {
+            if (!selectedLayerId) return;
+            const layer = layers.find(l => l.id === selectedLayerId);
+            if (layer && layer.type === 'image') {
+                layer.adjustments[adjust] = parseInt(val);
+                
+                // UI Label Update
+                let unit = '%';
+                if (adjust === 'blur') unit = 'px';
+                document.getElementById(`val-${adjust}`).textContent = `${val}${unit}`;
+                
+                renderCanvas();
+            }
+        }
+
+        // Update the global layers list panel (Layers Manager UI)
+        function updateLayersUI() {
+            const container = document.getElementById('layers-list-container');
+            const badge = document.getElementById('layers-badge');
+            container.innerHTML = '';
+            
+            badge.textContent = layers.length;
+
+            if (layers.length === 0) {
+                container.innerHTML = `<div class="text-slate-500 text-[11px] text-center py-4">Lienzo vacío. Agrega formas o fotos.</div>`;
+                return;
+            }
+
+            // Print layers reverse order (rendered top-most first)
+            for (let i = layers.length - 1; i >= 0; i--) {
+                const layer = layers[i];
+                const isSelected = layer.id === selectedLayerId;
+                
+                const item = document.createElement('div');
+                item.className = `flex items-center justify-between p-2 rounded-lg text-xs transition border ${
+                    isSelected 
+                        ? 'bg-indigo-600/15 border-indigo-500/50 text-slate-100' 
+                        : 'bg-slate-850 border-slate-800/80 hover:bg-slate-800 text-slate-400 hover:text-slate-200'
+                }`;
+
+                // Determine Layer Thumbnail Icon
+                let icon = 'square';
+                if (layer.type === 'image') icon = 'image';
+                if (layer.type === 'text') icon = 'type';
+                if (layer.type === 'shape') icon = 'shapes';
+                if (layer.type === 'drawing') icon = 'brush';
+                if (layer.type === 'emoji') icon = 'sparkles';
+
+                item.innerHTML = `
+                    <div class="flex items-center space-x-2 truncate cursor-pointer flex-1" onclick="selectLayer('${layer.id}')">
+                        <i data-lucide="${icon}" class="w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-indigo-400' : 'text-slate-500'}"></i>
+                        <span class="truncate pr-1">${layer.name}</span>
+                    </div>
+                    <div class="flex items-center space-x-1 shrink-0 ml-1">
+                        <button onclick="toggleLayerLock('${layer.id}')" class="p-1 hover:bg-slate-700/60 rounded text-slate-500 hover:text-slate-300" title="${layer.locked ? 'Desbloquear' : 'Bloquear'}">
+                            <i data-lucide="${layer.locked ? 'lock' : 'unlock'}" class="w-3 h-3"></i>
+                        </button>
+                        <button onclick="deleteLayerDirect('${layer.id}')" class="p-1 hover:bg-rose-950/40 rounded text-slate-500 hover:text-rose-400" title="Eliminar">
+                            <i data-lucide="trash-2" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(item);
+            }
+            
+            // Re-bind lucide icons
+            lucide.createIcons();
+        }
+
+        // Layer Selection Controller
+        function selectLayer(id) {
+            selectedLayerId = id;
+            renderCanvas();
+            updateLayersUI();
+
+            const layer = layers.find(l => l.id === id);
+            const quickBar = document.getElementById('quick-layer-bar');
+            
+            if (layer) {
+                // Show Quick actions Bar
+                quickBar.classList.remove('hidden');
+                document.getElementById('quick-layer-title').textContent = layer.type;
+
+                // Sync adjustments panel state
+                if (layer.type === 'image') {
+                    document.getElementById('adjustments-panel-content').classList.remove('opacity-50', 'pointer-events-none');
+                    document.getElementById('no-image-selected-alert').classList.add('hidden');
+                    
+                    // Sync sliders to current selected photo adjustments values
+                    const adj = layer.adjustments;
+                    document.getElementById('slider-brightness').value = adj.brightness;
+                    document.getElementById('slider-contrast').value = adj.contrast;
+                    document.getElementById('slider-saturation').value = adj.saturation;
+                    document.getElementById('slider-blur').value = adj.blur;
+                    document.getElementById('slider-grayscale').value = adj.grayscale;
+                    document.getElementById('slider-sepia').value = adj.sepia;
+
+                    document.getElementById('val-brightness').textContent = `${adj.brightness}%`;
+                    document.getElementById('val-contrast').textContent = `${adj.contrast}%`;
+                    document.getElementById('val-saturation').textContent = `${adj.saturation}%`;
+                    document.getElementById('val-blur').textContent = `${adj.blur}px`;
+                    document.getElementById('val-grayscale').textContent = `${adj.grayscale}%`;
+                    document.getElementById('val-sepia').textContent = `${adj.sepia}%`;
+                } else {
+                    document.getElementById('adjustments-panel-content').classList.add('opacity-50', 'pointer-events-none');
+                    document.getElementById('no-image-selected-alert').classList.remove('hidden');
+                }
+
+                // Sync Shapes Properties Contextually
+                if (layer.type === 'shape') {
+                    document.getElementById('shape-properties').classList.remove('hidden');
+                    if (layer.shapeType === 'rect') {
+                        document.getElementById('prop-border-radius').classList.remove('hidden');
+                    } else {
+                        document.getElementById('prop-border-radius').classList.add('hidden');
+                    }
+                    document.getElementById('shape-fill').value = layer.fillColor;
+                    document.getElementById('shape-stroke').value = layer.strokeColor;
+                    document.getElementById('shape-stroke-width').value = layer.strokeWidth;
+                    document.getElementById('shape-radius').value = layer.borderRadius;
+                    document.getElementById('val-shape-fill-hex').textContent = layer.fillColor;
+                    document.getElementById('val-shape-stroke-hex').textContent = layer.strokeColor;
+                    document.getElementById('val-shape-stroke-w').textContent = `${layer.strokeWidth}px`;
+                    document.getElementById('val-shape-radius').textContent = `${layer.borderRadius}px`;
+                } else {
+                    document.getElementById('shape-properties').classList.add('hidden');
+                }
+
+                // Sync Text Properties Contextually
+                if (layer.type === 'text') {
+                    document.getElementById('text-properties').classList.remove('hidden');
+                    document.getElementById('text-color').value = layer.color;
+                    document.getElementById('text-font').value = layer.fontFamily;
+                    document.getElementById('text-btn-bold').classList.toggle('bg-indigo-600', layer.fontWeight === 'bold');
+                    document.getElementById('text-btn-italic').classList.toggle('bg-indigo-600', layer.fontStyle === 'italic');
+                    document.getElementById('text-btn-shadow').classList.toggle('bg-indigo-600', layer.textShadow);
+                } else {
+                    document.getElementById('text-properties').classList.add('hidden');
+                }
+            } else {
+                quickBar.classList.add('hidden');
+            }
+        }
+
+        // Layer Visibility / Lock state toggler
+        function toggleLayerLock(id) {
+            const layer = layers.find(l => l.id === id);
+            if (layer) {
+                layer.locked = !layer.locked;
+                updateLayersUI();
+                renderCanvas();
+                showToast(layer.locked ? "Capa bloqueada para edición" : "Capa desbloqueada");
+            }
+        }
+
+        // Direct deletes from UI list
+        function deleteLayerDirect(id) {
+            layers = layers.filter(l => l.id !== id);
+            if (selectedLayerId === id) selectedLayerId = null;
+            updateLayersUI();
+            renderCanvas();
+            document.getElementById('quick-layer-bar').classList.add('hidden');
+            showToast("Capa eliminada");
+        }
+
+        // Delete active selected layer
+        function deleteActiveLayer() {
+            if (selectedLayerId) {
+                deleteLayerDirect(selectedLayerId);
+            }
+        }
+
+        // Duplicate active selected layer
+        function duplicateActiveLayer() {
+            if (!selectedLayerId) return;
+            const original = layers.find(l => l.id === selectedLayerId);
+            if (original) {
+                const copyId = generateId();
+                const copy = JSON.parse(JSON.stringify(original));
+                
+                // Set unique values for non-serializable objects (like image elements)
+                copy.id = copyId;
+                copy.name = `${original.name} (Copia)`;
+                copy.x += 30; // offset position so user sees the duplication
+                copy.y += 30;
+                
+                if (original.type === 'image') {
+                    copy.imgElement = original.imgElement; // reference elements
+                }
+
+                layers.push(copy);
+                selectedLayerId = copyId;
+                updateLayersUI();
+                renderCanvas();
+                showToast("Capa duplicada correctamente");
+            }
+        }
+
+        // Layer order stacking controller (Z-Index Shifter)
+        function layerZIndexShift(action) {
+            if (!selectedLayerId) return;
+            const idx = layers.findIndex(l => l.id === selectedLayerId);
+            if (idx === -1) return;
+
+            if (action === 'top' && idx < layers.length - 1) {
+                // Swap up
+                const temp = layers[idx];
+                layers[idx] = layers[idx + 1];
+                layers[idx + 1] = temp;
+            } else if (action === 'bottom' && idx > 0) {
+                // Swap down
+                const temp = layers[idx];
+                layers[idx] = layers[idx - 1];
+                layers[idx - 1] = temp;
+            }
+
+            updateLayersUI();
+            renderCanvas();
+        }
+
+        // Core Render Pipeline System
+        function renderCanvas() {
+            // Apply Physical high density dimensions
+            canvas.width = projectWidth;
+            canvas.height = projectHeight;
+
+            // Sync status bar
+            imgResolution.innerHTML = `<i data-lucide="maximize-2" class="w-3.5 h-3.5 text-slate-500"></i> ${projectWidth} × ${projectHeight} px`;
+            lucide.createIcons();
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Background Color
+            if (canvasBgColor !== 'transparent') {
+                ctx.fillStyle = canvasBgColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Draw layers bottom-up
+            layers.forEach(layer => {
+                ctx.save();
+
+                // Compute layer centers for rotational matrixes
+                const cx = layer.x + layer.w / 2;
+                const cy = layer.y + layer.h / 2;
+
+                ctx.translate(cx, cy);
+                ctx.rotate((layer.rotation * Math.PI) / 180);
+                ctx.globalAlpha = layer.opacity;
+
+                if (layer.type === 'image') {
+                    // Render image inside Photoshop filtered context
+                    const adj = layer.adjustments;
+                    ctx.filter = `
+                        brightness(${adj.brightness}%)
+                        contrast(${adj.contrast}%)
+                        saturate(${adj.saturation}%)
+                        blur(${adj.blur}px)
+                        grayscale(${adj.grayscale}%)
+                        sepia(${adj.sepia}%)
+                    `;
+                    ctx.drawImage(layer.imgElement, -layer.w / 2, -layer.h / 2, layer.w, layer.h);
+                } 
+                else if (layer.type === 'emoji') {
+                    ctx.font = `${layer.h * 0.8}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(layer.emoji, 0, 0);
+                }
+                else if (layer.type === 'shape') {
+                    ctx.fillStyle = layer.fillColor;
+                    ctx.strokeStyle = layer.strokeColor;
+                    ctx.lineWidth = layer.strokeWidth;
+
+                    const lx = -layer.w / 2;
+                    const ly = -layer.h / 2;
+
+                    if (layer.shapeType === 'rect') {
+                        // Rect with rounded border support
+                        const r = Math.min(layer.borderRadius, layer.w / 2, layer.h / 2);
+                        ctx.beginPath();
+                        ctx.moveTo(lx + r, ly);
+                        ctx.lineTo(lx + layer.w - r, ly);
+                        ctx.quadraticCurveTo(lx + layer.w, ly, lx + layer.w, ly + r);
+                        ctx.lineTo(lx + layer.w, ly + layer.h - r);
+                        ctx.quadraticCurveTo(lx + layer.w, ly + layer.h, lx + layer.w - r, ly + layer.h);
+                        ctx.lineTo(lx + r, ly + layer.h);
+                        ctx.quadraticCurveTo(lx, ly + layer.h, lx, ly + layer.h - r);
+                        ctx.lineTo(lx, ly + r);
+                        ctx.quadraticCurveTo(lx, ly, lx + r, ly);
+                        ctx.closePath();
+                        if (layer.fillColor) ctx.fill();
+                        if (layer.strokeWidth > 0) ctx.stroke();
+                    } 
+                    else if (layer.shapeType === 'circle') {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, Math.min(layer.w, layer.h) / 2, 0, 2 * Math.PI);
+                        ctx.closePath();
+                        if (layer.fillColor) ctx.fill();
+                        if (layer.strokeWidth > 0) ctx.stroke();
+                    }
+                    else if (layer.shapeType === 'triangle') {
+                        ctx.beginPath();
+                        ctx.moveTo(0, ly); // Top
+                        ctx.lineTo(lx + layer.w, ly + layer.h); // Bottom Right
+                        ctx.lineTo(lx, ly + layer.h); // Bottom Left
+                        ctx.closePath();
+                        if (layer.fillColor) ctx.fill();
+                        if (layer.strokeWidth > 0) ctx.stroke();
+                    }
+                    else if (layer.shapeType === 'star') {
+                        const cx = 0;
+                        const cy = 0;
+                        const spikes = 5;
+                        const outerRadius = Math.min(layer.w, layer.h) / 2;
+                        const innerRadius = outerRadius * 0.4;
+
+                        let rot = (Math.PI / 2) * 3;
+                        let x = cx;
+                        let y = cy;
+                        const step = Math.PI / spikes;
+
+                        ctx.beginPath();
+                        ctx.moveTo(cx, cy - outerRadius);
+                        for (let i = 0; i < spikes; i++) {
+                            x = cx + Math.cos(rot) * outerRadius;
+                            y = cy + Math.sin(rot) * outerRadius;
+                            ctx.lineTo(x, y);
+                            rot += step;
+
+                            x = cx + Math.cos(rot) * innerRadius;
+                            y = cy + Math.sin(rot) * innerRadius;
+                            ctx.lineTo(x, y);
+                            rot += step;
+                        }
+                        ctx.lineTo(cx, cy - outerRadius);
+                        ctx.closePath();
+                        if (layer.fillColor) ctx.fill();
+                        if (layer.strokeWidth > 0) ctx.stroke();
+                    }
+                }
+                else if (layer.type === 'text') {
+                    ctx.font = `${layer.fontStyle} ${layer.fontWeight} ${layer.fontSize}px ${layer.fontFamily}`;
+                    ctx.fillStyle = layer.color;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    // Optional design shadow
+                    if (layer.textShadow) {
+                        ctx.shadowColor = 'rgba(0,0,0,0.45)';
+                        ctx.shadowBlur = 8;
+                        ctx.shadowOffsetX = 3;
+                        ctx.shadowOffsetY = 3;
+                    }
+
+                    // Automatic vertical lines splitter
+                    const lines = layer.text.split('\n');
+                    const lineHeight = layer.fontSize * 1.25;
+                    const totalHeight = lines.length * lineHeight;
+                    let startY = -totalHeight / 2 + lineHeight / 2;
+
+                    lines.forEach(line => {
+                        ctx.fillText(line, 0, startY);
+                        startY += lineHeight;
+                    });
+                }
+                else if (layer.type === 'drawing') {
+                    // Free drawing lines
+                    if (layer.strokes && layer.strokes.length > 0) {
+                        ctx.translate(-cx, -cy); // Translate back to draw absolute strokes
+                        ctx.beginPath();
+                        ctx.lineCap = 'round';
+                        ctx.lineJoin = 'round';
+                        ctx.strokeStyle = layer.color;
+                        ctx.lineWidth = layer.lineWidth;
+
+                        ctx.moveTo(layer.strokes[0].x, layer.strokes[0].y);
+                        for (let i = 1; i < layer.strokes.length; i++) {
+                            ctx.lineTo(layer.strokes[i].x, layer.strokes[i].y);
+                        }
+                        ctx.stroke();
+                    }
+                }
+
+                ctx.restore();
+
+                // Render selected element design handles (Canva/Corel style transforms)
+                if (layer.id === selectedLayerId && activeCategory !== 'brush') {
+                    renderSelectedLayerHandles(layer);
+                }
+            });
+
+            // Draw Interactive Crop overlay if Crop Tab is selected
+            if (activeCategory === 'crop') {
+                ctx.save();
+                
+                // Semi-transparent overlay to dim the unselected areas
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+                
+                // Top overlay block
+                ctx.fillRect(0, 0, canvas.width, cropArea.y);
+                // Bottom overlay block
+                ctx.fillRect(0, cropArea.y + cropArea.h, canvas.width, canvas.height - (cropArea.y + cropArea.h));
+                // Left overlay block
+                ctx.fillRect(0, cropArea.y, cropArea.x, cropArea.h);
+                // Right overlay block
+                ctx.fillRect(cropArea.x + cropArea.w, cropArea.y, canvas.width - (cropArea.x + cropArea.w), cropArea.h);
+
+                // Selection Dashed White/Indigo Border
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(cropArea.x, cropArea.y, cropArea.w, cropArea.h);
+
+                ctx.strokeStyle = '#4f46e5';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([8, 6]);
+                ctx.strokeRect(cropArea.x, cropArea.y, cropArea.w, cropArea.h);
+                ctx.setLineDash([]);
+
+                // Drawing draggable corner handle circles
+                ctx.fillStyle = '#ffffff';
+                ctx.strokeStyle = '#4f46e5';
+                ctx.lineWidth = 2.5;
+                const hSize = 14;
+
+                const handles = [
+                    { x: cropArea.x, y: cropArea.y }, // Top-Left
+                    { x: cropArea.x + cropArea.w, y: cropArea.y }, // Top-Right
+                    { x: cropArea.x, y: cropArea.y + cropArea.h }, // Bottom-Left
+                    { x: cropArea.x + cropArea.w, y: cropArea.y + cropArea.h } // Bottom-Right
+                ];
+
+                handles.forEach(h => {
+                    ctx.beginPath();
+                    ctx.arc(h.x, h.y, hSize / 2, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                });
+
+                ctx.restore();
+            }
+        }
+
+        // Draw Interactive Transformation Handles around selected elements
+        function renderSelectedLayerHandles(layer) {
+            ctx.save();
+
+            const cx = layer.x + layer.w / 2;
+            const cy = layer.y + layer.h / 2;
+
+            ctx.translate(cx, cy);
+            ctx.rotate((layer.rotation * Math.PI) / 180);
+
+            // Bounds selection line
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+            ctx.strokeRect(-layer.w / 2, -layer.h / 2, layer.w, layer.h);
+            ctx.setLineDash([]);
+
+            // Draw Corner resize handles
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            const size = 9;
+
+            const corners = [
+                { x: -layer.w / 2, y: -layer.h / 2, h: 'tl' },
+                { x: layer.w / 2, y: -layer.h / 2, h: 'tr' },
+                { x: -layer.w / 2, y: layer.h / 2, h: 'bl' },
+                { x: layer.w / 2, y: layer.h / 2, h: 'br' }
+            ];
+
+            corners.forEach(c => {
+                ctx.fillRect(c.x - size / 2, c.y - size / 2, size, size);
+                ctx.strokeRect(c.x - size / 2, c.y - size / 2, size, size);
+            });
+
+            // Draw Rotation Handle above top
+            const ry = -layer.h / 2 - 25;
+            ctx.beginPath();
+            ctx.moveTo(0, -layer.h / 2);
+            ctx.lineTo(0, ry);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, ry, 6, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        // Convert coordinates from Client screen to Vector Project space
         function getCanvasMouseCoords(e) {
             const rect = canvas.getBoundingClientRect();
             
-            // Calculate scale factors
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
+            // Scaled dynamic factors
+            const scaleX = projectWidth / rect.width;
+            const scaleY = projectHeight / rect.height;
 
-            // Touch support fallback
             let clientX = e.clientX;
             let clientY = e.clientY;
 
@@ -766,169 +1564,329 @@
             };
         }
 
-        // Core Image Processing and Rendering Logic
-        function renderCanvas() {
-            if (!originalImage) return;
+        // Hit-test on rotated layers (Matrix inversion math)
+        function checkLayerSelectionHit(coords) {
+            // Loop through layers reverse order (top most first)
+            for (let i = layers.length - 1; i >= 0; i--) {
+                const layer = layers[i];
+                if (layer.locked || layer.type === 'drawing') continue;
 
-            // Set natural dimension base (accounting for rotations that swaps height/width)
-            const is90or270 = (rotationAngle === 90 || rotationAngle === 270);
-            const sourceWidth = originalImage.naturalWidth;
-            const sourceHeight = originalImage.naturalHeight;
+                const cx = layer.x + layer.w / 2;
+                const cy = layer.y + layer.h / 2;
 
-            canvas.width = is90or270 ? sourceHeight : sourceWidth;
-            canvas.height = is90or270 ? sourceWidth : sourceHeight;
+                // Local relative coordinates
+                const dx = coords.x - cx;
+                const dy = coords.y - cy;
+                const rad = (-layer.rotation * Math.PI) / 180;
 
-            // Update status bar details
-            imgName.textContent = currentImageName;
-            imgResolution.innerHTML = `<i data-lucide="maximize-2" class="w-3.5 h-3.5 text-slate-500"></i> ${sourceWidth} × ${sourceHeight} px`;
-            lucide.createIcons();
+                // Rotated coordinates inverse rotation matrix
+                const lx = dx * Math.cos(rad) - dy * Math.sin(rad) + layer.w / 2;
+                const ly = dx * Math.sin(rad) + dy * Math.cos(rad) + layer.h / 2;
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.save();
-
-            // Set up transformation matrix
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-
-            // Flip
-            const flipScaleH = flipH ? -1 : 1;
-            const flipScaleV = flipV ? -1 : 1;
-            ctx.scale(flipScaleH, flipScaleV);
-
-            // Rotation
-            ctx.rotate((rotationAngle * Math.PI) / 180);
-
-            // Apply filters using CSS-like context logic
-            ctx.filter = `
-                brightness(${adjustments.brightness}%)
-                contrast(${adjustments.contrast}%)
-                saturate(${adjustments.saturation}%)
-                blur(${adjustments.blur}px)
-                sepia(${adjustments.sepia}%)
-                grayscale(${adjustments.grayscale}%)
-                hue-rotate(${adjustments.hue}deg)
-            `;
-
-            // Draw image centered inside transformed context
-            ctx.drawImage(originalImage, -sourceWidth / 2, -sourceHeight / 2, sourceWidth, sourceHeight);
-            
-            // Clean transformations & filters to draw annotations (draw & text) in standard orientation
-            ctx.restore();
-            ctx.filter = 'none';
-
-            // Draw interactive drawings
-            drawings.forEach(stroke => {
-                if (stroke.points.length < 1) return;
-                ctx.beginPath();
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-                ctx.strokeStyle = stroke.color;
-                ctx.lineWidth = stroke.size;
-
-                ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-                for (let i = 1; i < stroke.points.length; i++) {
-                    ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+                // Bounds checking
+                if (lx >= 0 && lx <= layer.w && ly >= 0 && ly <= layer.h) {
+                    return layer.id;
                 }
-                ctx.stroke();
-            });
-
-            // Draw texts overlays
-            texts.forEach((txt, idx) => {
-                ctx.font = `bold ${txt.size}px Arial, sans-serif`;
-                ctx.fillStyle = txt.color;
-                ctx.textBaseline = 'middle';
-                ctx.textAlign = 'center';
-                
-                // Add soft drop-shadow to text to ensure readability on any background
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-                ctx.shadowBlur = 8;
-                ctx.shadowOffsetX = 2;
-                ctx.shadowOffsetY = 2;
-
-                ctx.fillText(txt.text, txt.x, txt.y);
-
-                // Add visual indicator if selected/hovered in Text tab
-                if (activeTab === 'text' && selectedTextIndex === idx) {
-                    ctx.shadowColor = 'transparent'; // turn off shadow for bounds box
-                    ctx.strokeStyle = '#6366f1';
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([6, 4]);
-                    
-                    const textWidth = ctx.measureText(txt.text).width;
-                    const padding = 12;
-                    ctx.strokeRect(
-                        txt.x - textWidth/2 - padding, 
-                        txt.y - txt.size/2 - padding, 
-                        textWidth + padding * 2, 
-                        txt.size + padding * 2
-                    );
-                    ctx.setLineDash([]); // Reset
-                }
-            });
+            }
+            return null;
         }
 
-        // EVENT LISTENERS FOR INTERACTIONS (Mouse / Touch)
+        // Check if handle was clicked
+        function checkHandleHit(coords) {
+            if (!selectedLayerId) return null;
+            const layer = layers.find(l => l.id === selectedLayerId);
+            if (!layer || layer.locked) return null;
 
-        // Mouse Down
+            const cx = layer.x + layer.w / 2;
+            const cy = layer.y + layer.h / 2;
+
+            const dx = coords.x - cx;
+            const dy = coords.y - cy;
+            const rad = (-layer.rotation * Math.PI) / 180;
+
+            // Coordinates in local space relative to center
+            const lx = dx * Math.cos(rad) - dy * Math.sin(rad);
+            const ly = dx * Math.sin(rad) + dy * Math.cos(rad);
+
+            const tol = 12; // tolerance area click area
+
+            // Corner coordinates in local space
+            if (Math.hypot(lx - (-layer.w / 2), ly - (-layer.h / 2)) < tol) return 'tl';
+            if (Math.hypot(lx - (layer.w / 2), ly - (-layer.h / 2)) < tol) return 'tr';
+            if (Math.hypot(lx - (-layer.w / 2), ly - (layer.h / 2)) < tol) return 'bl';
+            if (Math.hypot(lx - (layer.w / 2), ly - (layer.h / 2)) < tol) return 'br';
+
+            // Rotational handle coordinates
+            if (Math.hypot(lx, ly - (-layer.h / 2 - 25)) < tol) return 'rot';
+
+            return null;
+        }
+
+        // EVENT INTERACTION HANDLERS (Mousedown / Dragging / Scaling / Drawing)
+
         function handleStart(e) {
-            if (!originalImage) return;
             const coords = getCanvasMouseCoords(e);
 
-            if (activeTab === 'draw' && isDrawingMode) {
-                isDrawing = true;
-                currentStroke = {
-                    points: [coords],
-                    color: brushColor,
-                    size: brushSize
-                };
-                drawings.push(currentStroke);
-            } 
-            else if (activeTab === 'text') {
-                selectedTextIndex = -1;
-                for (let i = texts.length - 1; i >= 0; i--) {
-                    const txt = texts[i];
-                    ctx.font = `bold ${txt.size}px Arial, sans-serif`;
-                    const textWidth = ctx.measureText(txt.text).width;
-                    const halfH = txt.size / 2;
-                    const halfW = textWidth / 2;
+            // Crop tool active overlay hit tests
+            if (activeCategory === 'crop') {
+                const handleTolerance = 25; // Sensitivity radius
+                const x = coords.x;
+                const y = coords.y;
 
-                    // AABB Check
-                    if (coords.x >= txt.x - halfW - 10 && coords.x <= txt.x + halfW + 10 &&
-                        coords.y >= txt.y - halfH - 10 && coords.y <= txt.y + halfH + 10) {
-                        selectedTextIndex = i;
-                        isDraggingText = true;
-                        textDragStartX = coords.x - txt.x;
-                        textDragStartY = coords.y - txt.y;
-                        break;
-                    }
+                if (Math.hypot(x - cropArea.x, y - cropArea.y) < handleTolerance) {
+                    draggingCropHandle = 'tl';
+                } else if (Math.hypot(x - (cropArea.x + cropArea.w), y - cropArea.y) < handleTolerance) {
+                    draggingCropHandle = 'tr';
+                } else if (Math.hypot(x - cropArea.x, y - (cropArea.y + cropArea.h)) < handleTolerance) {
+                    draggingCropHandle = 'bl';
+                } else if (Math.hypot(x - (cropArea.x + cropArea.w), y - (cropArea.y + cropArea.h)) < handleTolerance) {
+                    draggingCropHandle = 'br';
+                } else if (x >= cropArea.x && x <= cropArea.x + cropArea.w && y >= cropArea.y && y <= cropArea.y + cropArea.h) {
+                    draggingCropArea = true;
+                    cropDragStartX = x - cropArea.x;
+                    cropDragStartY = y - cropArea.y;
                 }
+                return;
+            }
+
+            // Brush drawing module active
+            if (isDrawingMode) {
+                isDrawing = true;
+                currentDrawingPoints = [coords];
+                
+                // Spawn a new continuous stroke layer
+                const layerId = generateId();
+                layers.push({
+                    id: layerId,
+                    type: 'drawing',
+                    name: `Trazo ${layers.length + 1}`,
+                    strokes: currentDrawingPoints,
+                    color: document.getElementById('draw-color').value,
+                    lineWidth: brushSize,
+                    x: 0,
+                    y: 0,
+                    w: projectWidth,
+                    h: projectHeight,
+                    rotation: 0,
+                    opacity: 1,
+                    locked: false
+                });
+                selectedLayerId = layerId;
                 renderCanvas();
+                return;
+            }
+
+            // Normal Transformation Tools / Hit Checking
+            const hitHandle = checkHandleHit(coords);
+            if (hitHandle) {
+                draggingHandle = hitHandle;
+                const layer = layers.find(l => l.id === selectedLayerId);
+                
+                // Store structural values for scales
+                layerOrigX = layer.x;
+                layerOrigY = layer.y;
+                layerOrigW = layer.w;
+                layerOrigH = layer.h;
+                layerOrigRot = layer.rotation;
+                
+                dragStartX = coords.x;
+                dragStartY = coords.y;
+                return;
+            }
+
+            // Normal layer dragging click hit detection
+            const hitLayerId = checkLayerSelectionHit(coords);
+            if (hitLayerId) {
+                selectLayer(hitLayerId);
+                draggingLayer = true;
+                
+                const layer = layers.find(l => l.id === hitLayerId);
+                dragStartX = coords.x;
+                dragStartY = coords.y;
+                layerOrigX = layer.x;
+                layerOrigY = layer.y;
+            } else {
+                // Click on blank deselects
+                selectedLayerId = null;
+                document.getElementById('quick-layer-bar').classList.add('hidden');
+                document.getElementById('shape-properties').classList.add('hidden');
+                document.getElementById('text-properties').classList.add('hidden');
+                renderCanvas();
+                updateLayersUI();
             }
         }
 
-        // Mouse Move
         function handleMove(e) {
-            if (!originalImage) return;
             const coords = getCanvasMouseCoords(e);
 
-            if (activeTab === 'draw' && isDrawing && isDrawingMode) {
-                e.preventDefault(); // Stop mobile scrolling
-                currentStroke.points.push(coords);
-                renderCanvas();
-            } 
-            else if (activeTab === 'text' && isDraggingText && selectedTextIndex !== -1) {
+            // Crop tool bounds transformation dragging
+            if (activeCategory === 'crop') {
+                const x = Math.max(0, Math.min(projectWidth, coords.x));
+                const y = Math.max(0, Math.min(projectHeight, coords.y));
+                const minBoxSize = 40;
+
+                if (draggingCropHandle) {
+                    e.preventDefault();
+                    let x1 = cropArea.x;
+                    let y1 = cropArea.y;
+                    let x2 = cropArea.x + cropArea.w;
+                    let y2 = cropArea.y + cropArea.h;
+
+                    if (draggingCropHandle === 'tl') {
+                        x1 = Math.min(x, x2 - minBoxSize);
+                        y1 = Math.min(y, y2 - minBoxSize);
+                    } else if (draggingCropHandle === 'tr') {
+                        x2 = Math.max(x, x1 + minBoxSize);
+                        y1 = Math.min(y, y2 - minBoxSize);
+                    } else if (draggingCropHandle === 'bl') {
+                        x1 = Math.min(x, x2 - minBoxSize);
+                        y2 = Math.max(y, y1 + minBoxSize);
+                    } else if (draggingCropHandle === 'br') {
+                        x2 = Math.max(x, x1 + minBoxSize);
+                        y2 = Math.max(y, y1 + minBoxSize);
+                    }
+
+                    let w = x2 - x1;
+                    let h = y2 - y1;
+
+                    if (cropRatio !== 'free') {
+                        let targetRatio = 1;
+                        if (cropRatio === '1:1') targetRatio = 1;
+                        if (cropRatio === '16:9') targetRatio = 16 / 9;
+                        if (cropRatio === '4:3') targetRatio = 4 / 3;
+
+                        if (draggingCropHandle === 'br' || draggingCropHandle === 'tr') {
+                            h = w / targetRatio;
+                        } else {
+                            w = h * targetRatio;
+                        }
+
+                        if (x1 + w > projectWidth) {
+                            w = projectWidth - x1;
+                            h = w / targetRatio;
+                        }
+                        if (y1 + h > projectHeight) {
+                            h = projectHeight - y1;
+                            w = h * targetRatio;
+                        }
+
+                        x2 = x1 + w;
+                        y2 = y1 + h;
+                    }
+
+                    cropArea.x = x1;
+                    cropArea.y = y1;
+                    cropArea.w = x2 - x1;
+                    cropArea.h = y2 - y1;
+                    renderCanvas();
+                } else if (draggingCropArea) {
+                    e.preventDefault();
+                    let newX = coords.x - cropDragStartX;
+                    let newY = coords.y - cropDragStartY;
+
+                    newX = Math.max(0, Math.min(projectWidth - cropArea.w, newX));
+                    newY = Math.max(0, Math.min(projectHeight - cropArea.h, newY));
+
+                    cropArea.x = newX;
+                    cropArea.y = newY;
+                    renderCanvas();
+                }
+                return;
+            }
+
+            if (isDrawingMode && isDrawing) {
                 e.preventDefault();
-                const targetText = texts[selectedTextIndex];
-                targetText.x = coords.x - textDragStartX;
-                targetText.y = coords.y - textDragStartY;
+                currentDrawingPoints.push(coords);
+                renderCanvas();
+                return;
+            }
+
+            if (!selectedLayerId) return;
+            const layer = layers.find(l => l.id === selectedLayerId);
+            if (!layer || layer.locked) return;
+
+            // Move object
+            if (draggingLayer) {
+                e.preventDefault();
+                const dx = coords.x - dragStartX;
+                const dy = coords.y - dragStartY;
+                layer.x = layerOrigX + dx;
+                layer.y = layerOrigY + dy;
+                renderCanvas();
+            }
+
+            // Rotate / Scale operations
+            if (draggingHandle) {
+                e.preventDefault();
+                const dx = coords.x - dragStartX;
+                const dy = coords.y - dragStartY;
+
+                if (draggingHandle === 'rot') {
+                    // Calculate relative angle from layer center
+                    const cx = layer.x + layer.w / 2;
+                    const cy = layer.y + layer.h / 2;
+                    const angleRad = Math.atan2(coords.y - cy, coords.x - cx);
+                    layer.rotation = (angleRad * 180) / Math.PI - 90; // offset base 90 for orientation
+                } 
+                else {
+                    // Corner scale transforms
+                    let newW = layerOrigW;
+                    let newH = layerOrigH;
+
+                    // Convert current client moves into local layout systems
+                    const rad = (-layerOrigRot * Math.PI) / 180;
+                    const localDx = dx * Math.cos(rad) - dy * Math.sin(rad);
+                    const localDy = dx * Math.sin(rad) + dy * Math.cos(rad);
+
+                    const minSize = 20;
+
+                    if (draggingHandle === 'br') {
+                        newW = Math.max(minSize, layerOrigW + localDx * 2);
+                        newH = Math.max(minSize, layerOrigH + localDy * 2);
+                    } 
+                    else if (draggingHandle === 'tl') {
+                        newW = Math.max(minSize, layerOrigW - localDx * 2);
+                        newH = Math.max(minSize, layerOrigH - localDy * 2);
+                    }
+                    else if (draggingHandle === 'tr') {
+                        newW = Math.max(minSize, layerOrigW + localDx * 2);
+                        newH = Math.max(minSize, layerOrigH - localDy * 2);
+                    }
+                    else if (draggingHandle === 'bl') {
+                        newW = Math.max(minSize, layerOrigW - localDx * 2);
+                        newH = Math.max(minSize, layerOrigH + localDy * 2);
+                    }
+
+                    // For Text layers, we auto adjust font size scale proportionally
+                    if (layer.type === 'text') {
+                        const ratio = newW / layerOrigW;
+                        layer.fontSize = Math.max(8, Math.round(layer.fontSize * ratio));
+                        layer.h = newH;
+                    } else if (layer.type === 'emoji') {
+                        // Maintain square proportions
+                        const size = Math.max(newW, newH);
+                        newW = size;
+                        newH = size;
+                    }
+
+                    // Apply coordinate offsets to keep the layer centered at same point on stretch
+                    layer.x = (layerOrigX + layerOrigW / 2) - newW / 2;
+                    layer.y = (layerOrigY + layerOrigH / 2) - newH / 2;
+                    layer.w = newW;
+                    layer.h = newH;
+                }
+
                 renderCanvas();
             }
         }
 
-        // Mouse Up / Touch End
         function handleEnd() {
             isDrawing = false;
-            currentStroke = null;
-            isDraggingText = false;
+            draggingLayer = false;
+            draggingHandle = null;
+            draggingCropHandle = null;
+            draggingCropArea = false;
+            updateLayersUI();
         }
 
         // Attach Mouse Events
@@ -936,68 +1894,58 @@
         canvas.addEventListener('mousemove', handleMove);
         window.addEventListener('mouseup', handleEnd);
 
-        // Attach Touch Events (For mobile devices)
+        // Attach Touch Events (For responsive mobile interaction)
         canvas.addEventListener('touchstart', handleStart, { passive: false });
         canvas.addEventListener('touchmove', handleMove, { passive: false });
         canvas.addEventListener('touchend', handleEnd);
 
-        // Keyboard handler (Delete key to remove active text)
-        window.addEventListener('keydown', (e) => {
-            if (activeTab === 'text' && selectedTextIndex !== -1 && (e.key === 'Delete' || e.key === 'Backspace')) {
-                texts.splice(selectedTextIndex, 1);
-                selectedTextIndex = -1;
-                renderCanvas();
-                showToast("Texto eliminado");
-            }
-        });
-
-        // Reset All Button
+        // Reset project
         btnReset.addEventListener('click', () => {
-            if (confirm("¿Estás seguro de que deseas restablecer todos los cambios realizados en esta imagen?")) {
-                resetEditorState();
+            if (confirm("¿Estás seguro de que deseas vaciar por completo tu espacio de diseño?")) {
+                layers = [];
+                selectedLayerId = null;
                 renderCanvas();
-                showToast("Imagen restablecida al original");
+                updateLayersUI();
+                document.getElementById('quick-layer-bar').classList.add('hidden');
+                showToast("Diseño restablecido");
             }
         });
 
-        // Download processed high quality image
+        // Exporter Engine (Download PNG)
         btnDownload.addEventListener('click', () => {
-            if (!originalImage) return;
+            if (layers.length === 0) {
+                showToast("Agrega algunos elementos antes de exportar.");
+                return;
+            }
 
-            // Clear text highlights before exporting
-            const prevSelectIdx = selectedTextIndex;
-            selectedTextIndex = -1;
+            // Hide quick action handles temporarily to avoid exporting lines
+            const tempSelected = selectedLayerId;
+            selectedLayerId = null;
             renderCanvas();
 
             try {
-                // Get extension or default to png
-                const ext = currentImageName.split('.').pop().toLowerCase();
-                const mimeType = ext === 'png' ? 'image/png' : 'image/jpeg';
-                
-                // Browser-compatible canvas download stream
-                const dataURL = canvas.toDataURL(mimeType, 0.95);
+                const dataURL = canvas.toDataURL('image/png', 1.0);
                 const link = document.createElement('a');
                 
-                // Set appropriate filename with custom suffix
-                const cleanName = currentImageName.substring(0, currentImageName.lastIndexOf('.')) || currentImageName;
-                link.download = `${cleanName}_dmcstudio.${ext || 'png'}`;
+                const rawName = imgName.textContent.replace(/\s+/g, '_').toLowerCase();
+                link.download = `${rawName}_dmcstudio.png`;
                 link.href = dataURL;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
 
-                showToast("¡Tu foto editada se descargó correctamente!");
+                showToast("¡Diseño exportado correctamente en Alta Definición!");
             } catch (err) {
-                showToast("Error al exportar: la imagen puede tener restricciones de seguridad.");
+                showToast("Error al exportar. Revisa los permisos.");
                 console.error(err);
             }
 
-            // Restore selection index
-            selectedTextIndex = prevSelectIdx;
+            // Restore selection state
+            selectedLayerId = tempSelected;
             renderCanvas();
         });
 
-        // Simple Custom System Notification
+        // Quick System Toast Notification
         function showToast(message) {
             const toast = document.getElementById('toast-notification');
             const toastMsg = document.getElementById('toast-message');
@@ -1009,7 +1957,7 @@
             setTimeout(() => {
                 toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-24', 'opacity-0');
-            }, 3500);
+            }, 3000);
         }
     </script>
 </body>
